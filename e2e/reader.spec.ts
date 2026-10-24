@@ -41,7 +41,7 @@ test("browse, render diagrams, switch branch, filter and deep-link", async ({
   );
   await page.goto("/");
   await page.screenshot({
-    path: "/private/tmp/speckub-web-landing.png",
+    path: testInfo.outputPath("landing.png"),
     fullPage: true,
   });
   await page
@@ -71,7 +71,7 @@ test("browse, render diagrams, switch branch, filter and deep-link", async ({
   await page.getByRole("searchbox").fill("");
   await expect(page.locator(".diagram svg")).toBeVisible();
   await page.screenshot({
-    path: "/private/tmp/speckub-web-reader.png",
+    path: testInfo.outputPath("reader.png"),
     fullPage: true,
   });
   await page.setViewportSize({ width: 390, height: 844 });
@@ -82,7 +82,7 @@ test("browse, render diagrams, switch branch, filter and deep-link", async ({
     await page.evaluate(() => document.documentElement.scrollWidth),
   ).toBeLessThanOrEqual(390);
   await page.screenshot({
-    path: "/private/tmp/speckub-web-mobile.png",
+    path: testInfo.outputPath("mobile.png"),
     fullPage: true,
   });
   await page.reload();
