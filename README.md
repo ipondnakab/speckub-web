@@ -1,5 +1,7 @@
 # SpecKub Web
 
+[Open the reader](https://speckub-web.vercel.app) · [Try the SpecKub repository](https://speckub-web.vercel.app/?repo=ipondnakab%2Fspeckub)
+
 A public API reference reader for [SpecKub](https://github.com/ipondnakab/speckub).
 
 Paste a public GitHub repository URL, choose a branch, and browse its Markdown API specifications. Specs remain in their original repository; no upload or account is required.
