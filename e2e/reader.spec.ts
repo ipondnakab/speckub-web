@@ -1,9 +1,7 @@
 import { test, expect } from "@playwright/test";
 const text = (name: string) =>
   `---\nspeckub: true\nspecVersion: 1\nid: users.read\nkind: http\nmethod: GET\npath: /users/{id}\nsummary: ${name}\n---\n## Our custom contract\n\n| Field | Type |\n| --- | --- |\n| id | string |\n\n\`\`\`mermaid\nsequenceDiagram\nClient->>API: Get user\nAPI-->>Client: User\n\`\`\`\n`;
-test("browse, render diagrams, switch branch, filter and deep-link", async ({
-  page,
-}) => {
+test("browse, render diagrams, switch branch, filter and deep-link", async ({ page }, testInfo) => {
   await page.route("https://api.github.com/**", async (route) => {
     const url = route.request().url();
     let data: unknown = {};
