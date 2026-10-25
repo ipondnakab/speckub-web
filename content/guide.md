@@ -216,6 +216,8 @@ The reader defaults to **List**. Choose **Tree** and set **Max tree layers** fro
 
 [Open the public repository explorer](/explorer.html), paste `owner/repository` or a GitHub URL, then choose a branch. It reads existing SpecKub documents; it does not run discovery skills or generate docs.
 
+Try [the CRUD playground on its feature branch](/explorer.html?repo=ipondnakab%2Fspeckub&branch=feat%2Fcrud-deep-path-playground&endpoint=projects.list) to open `projects.list` and explore nested API routes.
+
 Search, filter available methods, and use **Copy link** to share an endpoint. Shared links follow the selected branch when reopened; source links point to the exact loaded commit. The explorer reads Markdown across the branch, so custom document locations work.
 
 GitHub's anonymous API quota and file/download limits apply. Cached snapshots may be shown with their timestamp during temporary failures. Caching reduces repeated requests but does not remove the quota. A first uncached visit may need to wait for GitHub's reset time.

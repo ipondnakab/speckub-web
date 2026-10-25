@@ -1,3 +1,4 @@
+@import "./tables.css";
 @import "./header.css";
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
 :root {
@@ -568,9 +569,7 @@ pre:focus-visible {
 .docs-content table {
   border-collapse: collapse;
   font-size: 12px;
-  width: 100%;
   line-height: 1.8;
-  margin: 20px 0;
 }
 .docs-content th,
 .docs-content td {

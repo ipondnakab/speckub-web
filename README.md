@@ -1,6 +1,6 @@
 # SpecKub — introduction, docs, and explorer
 
-[Open the reader](https://speckub-web.vercel.app) · [Try the SpecKub repository](https://speckub-web.vercel.app/?repo=ipondnakab%2Fspeckub)
+[Open the reader](https://speckub-web.vercel.app) · [Try the SpecKub repository](https://speckub-web.vercel.app/explorer.html?repo=ipondnakab%2Fspeckub&branch=feat%2Fcrud-deep-path-playground&endpoint=projects.list)
 
 The public website for [SpecKub](https://github.com/ipondnakab/speckub), with a product introduction, practical documentation, and an API reference explorer.
 

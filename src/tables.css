@@ -1,0 +1,33 @@
+.table-scroll {
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  margin: 20px 0;
+  overscroll-behavior-x: contain;
+}
+.table-scroll:focus-visible {
+  outline: 2px solid #ed7091;
+  outline-offset: 3px;
+}
+.table-scroll > table {
+  display: table;
+  width: max-content;
+  min-width: 100%;
+  max-width: none;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.table-scroll th,
+.table-scroll td {
+  min-width: 110px;
+  max-width: 360px;
+  overflow-wrap: normal;
+  word-break: normal;
+  vertical-align: top;
+}
+.table-scroll th {
+  white-space: nowrap;
+}
+.table-scroll code {
+  overflow-wrap: anywhere;
+}

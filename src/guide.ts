@@ -1,3 +1,4 @@
+import { configureTables } from "./tables";
 import MarkdownIt from "markdown-it";
 
 export type GuideSection = { id: string; title: string };
@@ -8,6 +9,7 @@ export function renderGuide(source: string): {
   sections: GuideSection[];
 } {
   const md = new MarkdownIt({ html: false });
+  configureTables(md);
   const used = new Set<string>();
   const sections: GuideSection[] = [];
   md.renderer.rules.heading_open = (tokens, index, options, _env, self) => {

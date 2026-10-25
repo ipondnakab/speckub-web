@@ -1,3 +1,4 @@
+@import "./tables.css";
 @import "./header.css";
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
 :root {
@@ -144,7 +145,7 @@ form label {
   color: #8892a0;
   font-size: 11px;
 }
-.try button {
+.try a {
   border: 0;
   background: transparent;
   padding: 0;
@@ -342,6 +343,8 @@ aside select {
   line-height: 1.5;
 }
 .method {
+  flex-shrink: 0;
+  white-space: nowrap;
   font:
     700 10px ui-monospace,
     monospace;
@@ -397,6 +400,7 @@ article > h2 {
   overflow-wrap: anywhere;
 }
 .route code {
+  min-width: 0;
   font-size: 13px;
 }
 .file-link {
@@ -461,13 +465,6 @@ article > h2 {
 .prose code {
   font-family: ui-monospace, SFMono-Regular, monospace;
   font-size: 0.9em;
-}
-.prose table {
-  display: block;
-  max-width: 100%;
-  overflow: auto;
-  border-collapse: collapse;
-  font-size: 12px;
 }
 .prose th,
 .prose td {

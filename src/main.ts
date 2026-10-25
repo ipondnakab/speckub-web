@@ -29,7 +29,7 @@ const app = document.querySelector<HTMLDivElement>("#app")!;
 app.innerHTML = `${header("explorer")}
 <main id="main"><section class="hero"><div class="eyebrow"><span class="dot"></span> YOUR CODE. YOUR SPECS. EVERY BRANCH.</div><h1>Your APIs,<br><span>an open book.</span></h1><p>Turn a public repository into a readable API reference.<br>Choose a branch. Explore the specs. Stay close to the code.</p>
 <form id="repo-form"><label for="repo-input">PUBLIC GITHUB REPOSITORY</label><div class="input-row"><span aria-hidden="true">⌘</span><input id="repo-input" placeholder="github.com/owner/repository" autocomplete="off" required aria-label="Public GitHub repository"><button type="submit">Open repository <span>↗</span></button></div></form>
-<div class="try">Try it with <button id="example">ipondnakab/speckub ↗</button><span>Public repos · No sign-in needed</span></div></section>
+<div class="try">Try it with <a id="example" href="/explorer.html?repo=ipondnakab%2Fspeckub&amp;branch=feat%2Fcrud-deep-path-playground&amp;endpoint=projects.list">Playground · projects.list ↗</a><span>Public repos · No sign-in needed</span></div></section>
 <div id="status" role="status" aria-live="polite"></div><section id="workspace" hidden><div class="repo-bar"><div><span class="eyebrow">REPOSITORY</span><h2 id="repo-name"></h2></div><div class="branch-control"><label for="branch">Branch</label><select id="branch"></select><button id="refresh" class="secondary">Refresh</button></div></div><div id="snapshot"></div><details id="issues" hidden><summary></summary><ul></ul></details>
 <div class="reader"><aside><label class="eyebrow" for="search">API REFERENCE</label><input id="search" type="search" placeholder="Search endpoints…"><label class="sr-only" for="method">HTTP method</label><select id="method"><option value="">All methods</option></select><div class="navigation-settings">
   <div><label for="navigation-view">View</label><select id="navigation-view"><option value="list">List</option><option value="tree">Tree</option></select></div>
@@ -459,10 +459,6 @@ async function renderDoc() {
 }
 el("repo-form").onsubmit = (e) => {
   e.preventDefault();
-  void connect();
-};
-el("example").onclick = () => {
-  input.value = "ipondnakab/speckub";
   void connect();
 };
 el("branch").onchange = () => {
