@@ -30,7 +30,7 @@ app.innerHTML = `<header><a class="brand" href="/" aria-label="SpecKub home"><sv
 <form id="repo-form"><label for="repo-input">PUBLIC GITHUB REPOSITORY</label><div class="input-row"><span aria-hidden="true">⌘</span><input id="repo-input" placeholder="github.com/owner/repository" autocomplete="off" required aria-label="Public GitHub repository"><button type="submit">Open repository <span>↗</span></button></div></form>
 <div class="try">Try it with <button id="example">ipondnakab/speckub ↗</button><span>Public repos · No sign-in needed</span></div></section>
 <div id="status" role="status" aria-live="polite"></div><section id="workspace" hidden><div class="repo-bar"><div><span class="eyebrow">REPOSITORY</span><h2 id="repo-name"></h2></div><div class="branch-control"><label for="branch">Branch</label><select id="branch"></select><button id="refresh" class="secondary">Refresh</button></div></div><div id="snapshot"></div><details id="issues" hidden><summary></summary><ul></ul></details>
-<div class="reader"><aside><label class="eyebrow" for="search">API REFERENCE</label><input id="search" type="search" placeholder="Search endpoints…"><label class="sr-only" for="method">HTTP method</label><select id="method"><option value="">All methods</option>${["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"].map((m) => `<option>${m}</option>`).join("")}</select><div class="navigation-settings">
+<div class="reader"><aside><label class="eyebrow" for="search">API REFERENCE</label><input id="search" type="search" placeholder="Search endpoints…"><label class="sr-only" for="method">HTTP method</label><select id="method"><option value="">All methods</option></select><div class="navigation-settings">
   <div><label for="navigation-view">View</label><select id="navigation-view"><option value="list">List</option><option value="tree">Tree</option></select></div>
   <div id="tree-depth-setting" hidden><label for="tree-depth">Max tree layers</label><input id="tree-depth" type="number" min="1" max="12" step="1" value="2" title="Maximum visible folder levels (1–12)"></div>
 </div><div id="count"></div><nav id="endpoints" aria-label="Endpoints"></nav></aside><article id="document"></article></div></section>
@@ -148,6 +148,16 @@ async function readBranch(target?: LoadTarget, refresh = false) {
     availableBranches = request.branches;
     activeBranch = request.branch;
     specs = result.specs;
+    const methodFilter = el<HTMLSelectElement>("method");
+    const previousMethod = methodFilter.value;
+    const methods = [...new Set(specs.map((spec) => spec.method))].sort();
+    methodFilter.replaceChildren(
+      new Option("All methods", ""),
+      ...methods.map((method) => new Option(method, method)),
+    );
+    methodFilter.value = methods.some((method) => method === previousMethod)
+      ? previousMethod
+      : "";
     sha = result.sha;
     el("repo-name").textContent = repo.full;
     const branch = el<HTMLSelectElement>("branch");

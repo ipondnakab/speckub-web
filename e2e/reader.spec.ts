@@ -137,6 +137,11 @@ test("path tree keeps parent routes, multiple methods and filtered matches acces
   await expect(api).toBeVisible();
   await expect(users).toBeVisible();
   await expect(users.locator(".endpoint")).toHaveCount(3);
+  await expect(page.locator("#method option")).toHaveText([
+    "All methods",
+    "GET",
+    "POST",
+  ]);
   await expect(users.locator(".path-count").first()).toHaveText("3");
   await users.locator("summary").first().click();
   await expect(users).not.toHaveAttribute("open");
