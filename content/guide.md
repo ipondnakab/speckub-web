@@ -18,28 +18,36 @@ Here is a walkthrough for an existing service. Run terminal commands from the AP
 
 ### 1. Install and initialize
 
-**Terminal**
+**Terminal · install once, initialize each project**
+
+We recommend a global installation. SpecKub is a documentation CLI; your API does not need to depend on it or have an npm manifest.
+
+```sh
+npm install --global @speckub/cli
+speckub init --agent codex
+```
+
+Install once on your machine, then run `speckub init` from each API project's root. For Claude, Cursor, or every integration, replace `codex` with `claude`, `cursor`, or `all`. Initialization creates skills, an editable template and example in `.speckub/`, and a default `docs/api/` directory. Existing files, including project instructions and custom templates, are preserved.
+
+### Optional: pin the CLI to a project
+
+If your team wants a project-managed CLI version, use a development dependency instead. These commands are an alternative to the recommended global installation.
+
+**npm**
 
 ```sh
 npm install --save-dev @speckub/cli
 npx speckub init --agent codex
 ```
 
-For Claude, Cursor, or every integration, replace `codex` with `claude`, `cursor`, or `all`. Initialization creates skills, an editable template and example in `.speckub/`, and a default `docs/api/` directory. Existing files, including project instructions and custom templates, are preserved.
-
-If your project has no npm manifest, a global installation also works:
+**Yarn**
 
 ```sh
-npm install --global @speckub/cli
-speckub init --agent all
+yarn add --dev @speckub/cli
+yarn speckub init --agent codex
 ```
 
-For Yarn projects:
-
-```sh
-yarn add --dev @speckub/cli --registry https://registry.npmjs.org
-yarn speckub init --agent all
-```
+For a local installation, use `npx speckub` or `yarn speckub` wherever the rest of this guide uses `speckub`.
 
 ### 2. Discover and document in agent chat
 
@@ -64,8 +72,8 @@ For Claude or Cursor, use `/speckub.scan`, `/speckub.relations`, and `/speckub.c
 **Terminal**
 
 ```sh
-npx speckub list
-npx speckub ui --serve
+speckub list
+speckub ui --serve
 ```
 
 Open the printed local URL. You can search endpoints, filter methods, switch between List and Tree, and read the contracts and diagrams. Review the generated Markdown and Git diff before committing. Rerun `ui` whenever specs change.
@@ -80,7 +88,7 @@ To narrow the work, include a service directory, route prefix, specific file, or
 $speckub-scan Scan only services/payments/. Include mounted route prefixes and report unresolved dynamic routes.
 ```
 
-The terminal command `npx speckub scan` prepares skills and prints a handoff prompt. It does not run an AI scan by itself. Paste the handoff into your coding agent.
+The terminal command `speckub scan` prepares skills and prints a handoff prompt. It does not run an AI scan by itself. Paste the handoff into your coding agent.
 
 ## Relations
 
@@ -175,7 +183,7 @@ Sequence diagrams should follow the actual implementation. The reader supports M
 Copy a real endpoint ID from `list` and check it:
 
 ```sh
-npx speckub validate --id users.read --json
+speckub validate --id users.read --json
 ```
 
 The CLI checks document structure and cited source references. **Semantic validation remains `skipped`**: a successful structural check does not prove that the application implements the documented behavior. Run the project's own tests as well.
@@ -199,7 +207,7 @@ Review the changes, preserve the existing ID, and regenerate the reader. The AI 
 The CLI reader discovers eligible Markdown throughout the selected project root, including specs stored alongside services. Dependencies, generated output, `.speckub`, and agent configuration directories are excluded. Use `--docs-dir` only when you want to restrict discovery.
 
 ```sh
-npx speckub ui --serve
+speckub ui --serve
 ```
 
 The reader defaults to **List**. Choose **Tree** and set **Max tree layers** from 1–12 to group deep API paths. Endpoints below the cap remain listed. Your view preference is saved in the browser when storage is available.
@@ -217,7 +225,7 @@ GitHub's anonymous API quota and file/download limits apply. Cached snapshots ma
 Use the local CLI reader for private code:
 
 ```sh
-npx speckub ui --out .speckub/site --serve
+speckub ui --out .speckub/site --serve
 ```
 
 The export includes its scripts, styles, diagrams, and spec content for offline use. Preview binds to `127.0.0.1`. Without `--serve`, open the generated `index.html` or host the complete output directory.
@@ -226,7 +234,7 @@ The export has **no built-in authentication**. A private GitHub repository does 
 
 ## CLI reference
 
-Run these in the project root. For a locally installed CLI use `npx speckub`; with Yarn use `yarn speckub`; with a global installation use `speckub`.
+Run these in the project root with the recommended global installation: `speckub COMMAND`. If you chose a project-local dependency, use `npx speckub COMMAND` or `yarn speckub COMMAND` instead.
 
 | Command              | Purpose                                                                                         |
 | -------------------- | ----------------------------------------------------------------------------------------------- |
@@ -245,9 +253,9 @@ Use `--root DIR` to choose a project, `--docs-dir DIR` to narrow document discov
 From the parent repository:
 
 ```sh
-npx speckub init --root portfolio-api --agent all
-npx speckub list --root portfolio-api
-npx speckub ui --root portfolio-api --serve
+speckub init --root portfolio-api --agent all
+speckub list --root portfolio-api
+speckub ui --root portfolio-api --serve
 ```
 
 Open the agent in the selected API project. Keep source references relative to that root. If existing project instructions were preserved during initialization, review them and add the relevant workflow guidance without overwriting your team's rules.
@@ -264,11 +272,11 @@ Initialization creates the authoring setup, not endpoint specs. Run scan, relati
 
 ### The package or command is not found
 
-Install `@speckub/cli`, not only `@speckub/schema`. Use `npx speckub` or `yarn speckub` for local installs. If Yarn's registry has not picked up a package, retry with `--registry https://registry.npmjs.org`. A just-published package may still be processing.
+Install `@speckub/cli`, not only `@speckub/schema`. After a global installation, confirm `speckub --help` works and that your package manager's global executable directory is on your shell PATH. For local installs use `npx speckub` or `yarn speckub`. A just-published package may still be processing.
 
 ### My reader still looks old
 
-Upgrade the CLI, then rerun `speckub ui` to replace generated assets. An existing export does not update itself. Hard-refresh the browser if it still has cached assets.
+Run `npm install --global @speckub/cli@latest` to upgrade the global CLI, then rerun `speckub ui` to replace generated assets. An existing export does not update itself. Hard-refresh the browser if it still has cached assets.
 
 ### Can I use this with any language?
 

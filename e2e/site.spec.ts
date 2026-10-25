@@ -53,7 +53,7 @@ test("docs deep links and code copying work", async ({ page, context }) => {
       .first(),
   ).toHaveText("Copied");
   expect(await page.evaluate(() => navigator.clipboard.readText())).toContain(
-    "npx speckub init --agent codex",
+    "npm install --global @speckub/cli\nspeckub init --agent codex",
   );
   const broken = await page.evaluate(() =>
     [...document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')]
@@ -94,4 +94,66 @@ test("home and documentation remain readable on a narrow screen", async ({
     path: testInfo.outputPath("docs-desktop.png"),
     fullPage: true,
   });
+});
+
+test("long prompts wrap and copy controls remain outside code scrolling", async ({
+  page,
+  context,
+}, testInfo) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  for (const width of [390, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.goto("/docs.html#custom-templates");
+    const prompt = page
+      .locator(".code-block--prompt")
+      .filter({ hasText: "$speckub-template" });
+    await expect(prompt).toBeInViewport();
+    expect(
+      await prompt
+        .locator("pre")
+        .evaluate((pre) => pre.scrollWidth <= pre.clientWidth),
+    ).toBe(true);
+    await prompt.getByRole("button", { name: "Copy code example" }).click();
+    await expect(prompt.getByRole("button")).toHaveText("Copied");
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+      await prompt.locator("code").textContent(),
+    );
+    await page.screenshot({
+      path: testInfo.outputPath(`template-prompt-${width}.png`),
+    });
+    const example = page
+      .locator(".code-block")
+      .filter({ has: page.locator(".language-markdown") })
+      .first();
+    await example.scrollIntoViewIfNeeded();
+    const copy = example.getByRole("button", { name: "Copy code example" });
+    const before = await copy.boundingBox();
+    await example.locator("pre").evaluate((pre) => {
+      pre.scrollLeft = pre.scrollWidth;
+    });
+    expect(await copy.boundingBox()).toEqual(before);
+    await expect(copy).toBeVisible();
+  }
+});
+
+test("clipboard denial selects only the example and malformed anchors do not break docs", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator.clipboard, "writeText", {
+      value: () => Promise.reject(new Error("Clipboard denied")),
+    });
+  });
+  await page.goto("/docs.html#%ZZ");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  await page.getByRole("button", { name: "Copy code example" }).first().click();
+  await expect(
+    page.getByRole("button", { name: "Copy code example" }).first(),
+  ).toHaveText("Select to copy");
+  expect(
+    (await page.evaluate(() => window.getSelection()?.toString()))?.trimEnd(),
+  ).toBe("npm install --global @speckub/cli\nspeckub init --agent codex");
+  expect(errors).toEqual([]);
 });

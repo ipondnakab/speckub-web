@@ -1,28 +1,17 @@
 import "./site.css";
-import MarkdownIt from "markdown-it";
+import { renderGuide } from "./guide";
 import guide from "../content/guide.md?raw";
 import { header, footer, installCopyButtons } from "./site";
-const md = new MarkdownIt({ html: false });
-const ids = new Map<string, number>();
-const sections: { id: string; title: string }[] = [];
-const slug = (title: string) =>
-  title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-md.renderer.rules.heading_open = (tokens, index, options, _env, self) => {
-  const title = tokens[index + 1].content;
-  const base = slug(title);
-  const count = ids.get(base) ?? 0;
-  ids.set(base, count + 1);
-  const id = count ? `${base}-${count}` : base;
-  tokens[index].attrSet("id", id);
-  if (tokens[index].tag === "h2") sections.push({ id, title });
-  return self.renderToken(tokens, index, options);
-};
-const content = md.render(guide);
+const { html: content, sections } = renderGuide(guide);
 const app = document.querySelector<HTMLDivElement>("#app")!;
-app.innerHTML = `${header("docs")}<main id="main" class="docs-layout"><aside class="docs-sidebar"><p class="site-eyebrow">DOCUMENTATION</p><nav aria-label="Documentation sections">${sections.map(({ id, title }) => `<a href="#${id}">${md.utils.escapeHtml(title)}</a>`).join("")}</nav><a class="docs-explorer-link" href="/explorer.html">Open the explorer ↗</a></aside><article class="docs-content"><p class="site-eyebrow">THE SPECKUB GUIDE</p>${content}</article></main>${footer}`;
+app.innerHTML = `${header("docs")}<main id="main" class="docs-layout"><aside class="docs-sidebar"><p class="site-eyebrow">DOCUMENTATION</p><nav aria-label="Documentation sections"></nav><a class="docs-explorer-link" href="/explorer.html">Open the explorer ↗</a></aside><article class="docs-content"><p class="site-eyebrow">THE SPECKUB GUIDE</p>${content}</article></main>${footer}`;
+const navigation = app.querySelector<HTMLElement>(".docs-sidebar nav")!;
+for (const { id, title } of sections) {
+  const link = document.createElement("a");
+  link.href = `#${id}`;
+  link.textContent = title;
+  navigation.append(link);
+}
 installCopyButtons(app);
 const links = [
   ...app.querySelectorAll<HTMLAnchorElement>(".docs-sidebar nav a"),
@@ -39,9 +28,27 @@ function markCurrent() {
     else link.removeAttribute("aria-current");
   }
 }
-window.addEventListener("scroll", markCurrent, { passive: true });
+let scheduled = false;
+window.addEventListener(
+  "scroll",
+  () => {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      markCurrent();
+      scheduled = false;
+    });
+  },
+  { passive: true },
+);
 markCurrent();
-if (location.hash)
-  document
-    .getElementById(decodeURIComponent(location.hash.slice(1)))
-    ?.scrollIntoView();
+if (location.hash) {
+  // Ignore malformed URL fragments instead of breaking the entire guide.
+  try {
+    document
+      .getElementById(decodeURIComponent(location.hash.slice(1)))
+      ?.scrollIntoView();
+  } catch {
+    /* Unknown or malformed fragments leave the document at its current position. */
+  }
+}

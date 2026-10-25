@@ -54,6 +54,8 @@ The Markdown body may use any custom headings, order, tables, code examples, and
 
 Invalid candidates, duplicate IDs, failed downloads, and oversized files are reported visibly; the first duplicate by sorted file path is retained. Ordinary Markdown is ignored. Structural validation does not prove that the implementation matches a spec.
 
+See [development conventions](docs/development.md) for page boundaries, documentation examples, accessibility, and validation patterns.
+
 ## Local development
 
 Requires Node.js 22.12+.

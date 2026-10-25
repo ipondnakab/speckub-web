@@ -173,6 +173,7 @@ test("header logo and favicon have a transparent lightning cutout", async ({
   page,
 }) => {
   await page.goto("/");
+  await expect(page.locator(".brand-logo")).toBeVisible();
   const colors = await page.evaluate(async () => {
     const logo = document.querySelector<SVGSVGElement>(".brand-logo")!;
     logo.setAttribute("width", "512");
