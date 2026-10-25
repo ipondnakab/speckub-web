@@ -1,3 +1,4 @@
+@import "./header.css";
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
 :root {
   font-family: "DM Sans", system-ui, sans-serif;
@@ -40,46 +41,6 @@ input:focus-visible,
 select:focus-visible {
   outline: 3px solid #ed7091;
   outline-offset: 3px;
-}
-header {
-  height: 94px;
-  max-width: 1352px;
-  margin: auto;
-  padding: 0 48px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--line);
-}
-.brand {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  color: #19191c;
-  font-family: Manrope, system-ui, sans-serif;
-  font-size: 23px;
-  font-weight: 800;
-}
-.brand:hover {
-  text-decoration: none;
-}
-.brand-logo {
-  width: 38px;
-  height: 38px;
-  display: block;
-  flex-shrink: 0;
-}
-.brand-label {
-  font-size: 10px;
-  letter-spacing: 2px;
-  color: #87919d;
-  border-left: 1px solid #ccd3dd;
-  padding-left: 15px;
-  margin-left: 6px;
-}
-.github-link {
-  font-size: 13px;
-  color: #667085;
 }
 main {
   max-width: 1256px;
@@ -574,19 +535,6 @@ article > h2 {
   display: none !important;
 }
 @media (max-width: 760px) {
-  header {
-    height: 75px;
-    padding: 0 22px;
-  }
-  .brand-label {
-    display: none;
-  }
-  .brand {
-    font-size: 21px;
-  }
-  .github-link {
-    font-size: 11px;
-  }
   main {
     padding: 0 20px;
   }
@@ -779,23 +727,5 @@ select,
   .navigation-settings select {
     appearance: auto;
     background-image: none;
-  }
-}
-
-.reader-site-nav {
-  display: flex;
-  gap: 24px;
-  font-size: 13px;
-}
-.reader-site-nav a {
-  color: #667085;
-}
-.reader-site-nav a[aria-current] {
-  color: var(--accent);
-}
-@media (max-width: 760px) {
-  .reader-site-nav {
-    gap: 14px;
-    font-size: 11px;
   }
 }

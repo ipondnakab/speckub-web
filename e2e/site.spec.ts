@@ -157,3 +157,50 @@ test("clipboard denial selects only the example and malformed anchors do not bre
   ).toBe("npm install --global @speckub/cli\nspeckub init --agent codex");
   expect(errors).toEqual([]);
 });
+
+test("all pages share the same navbar with the correct active destination", async ({
+  page,
+}, testInfo) => {
+  // Keep layout comparison independent of third-party font network availability.
+  await page.route("https://fonts.googleapis.com/**", (route) =>
+    route.fulfill({ body: "", contentType: "text/css" }),
+  );
+  for (const width of [390, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    let reference: unknown;
+    for (const [url, active] of [
+      ["/", "Overview"],
+      ["/docs.html", "Docs"],
+      ["/explorer.html", "Explorer"],
+    ]) {
+      await page.goto(url);
+      const header = page.locator(".site-header");
+      await expect(header).toBeVisible();
+      await page.evaluate(() => document.fonts.ready);
+      const nav = page.getByRole("navigation", { name: "Main navigation" });
+      await expect(nav.locator('[aria-current="page"]')).toHaveCount(1);
+      await expect(nav.locator('[aria-current="page"]')).toContainText(active);
+      const layout = await header.evaluate((element) => {
+        const box = element.getBoundingClientRect();
+        const brand = element.querySelector(".brand")!.getBoundingClientRect();
+        return {
+          x: box.x,
+          width: box.width,
+          height: box.height,
+          brandX: brand.x,
+          brandWidth: brand.width,
+          links: [...element.querySelectorAll("nav a")].map((a) => ({
+            text: a.textContent,
+            href: a.getAttribute("href"),
+          })),
+        };
+      });
+      if (reference) expect(layout).toEqual(reference);
+      else reference = layout;
+      if (active === "Explorer")
+        await page.screenshot({
+          path: testInfo.outputPath(`shared-navbar-${width}.png`),
+        });
+    }
+  }
+});

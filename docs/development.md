@@ -5,7 +5,7 @@
 - `src/entry.ts` preserves legacy repository query links and selects the homepage or reader. `explorer.html` and `docs.html` are explicit build entrypoints.
 - `src/home.ts` composes the introduction from readable markup in `src/home.html`; `content/guide.md` owns user documentation. Keep shell commands and agent prompts in separate fenced blocks with `sh` and `text` language labels.
 - `src/guide.ts` renders bundled guide content. Keep parser state local to each call and produce stable, unique anchors. Plain navigation labels are inserted with `textContent`.
-- `src/site.ts` owns the shared logo, page chrome, and code-example enhancement. Keep copy controls outside scrollable content. Enhancement must be safe to call twice, and clipboard failure must leave an accessible manual-copy path.
+- `src/site.ts` owns the shared logo, page chrome, and code-example enhancement. All pages, including the explorer, use the same header markup and `src/header.css` styles. Keep copy controls outside scrollable content. Enhancement must be safe to call twice, and clipboard failure must leave an accessible manual-copy path.
 - `src/main.ts` owns reader interactions. GitHub loading/caching, Markdown rendering, discovery, and navigation preferences remain in their existing focused modules. Do not add repository network calls to overview or docs.
 
 ## Documentation examples
