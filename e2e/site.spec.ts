@@ -34,7 +34,7 @@ test("introduction leads to docs and reader without fetching repository data", a
     .click();
   await expect(page).toHaveURL(/explorer\.html$/);
   await expect(
-    page.getByRole("textbox", { name: "Public GitHub repository" }),
+    page.getByRole("textbox", { name: "Public GitHub, GitLab, or Bitbucket repository" }),
   ).toBeVisible();
   expect(githubCalls).toBe(0);
 });

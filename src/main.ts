@@ -24,11 +24,12 @@ function loadMermaid(): Promise<Mermaid> {
 }
 import type { Spec } from "./discovery";
 import { openRepo, loadBranch, sourceUrl, type Repo } from "./github";
+import { parseRemote } from "./git-providers";
 import { renderMarkdown } from "./markdown";
 const app = document.querySelector<HTMLDivElement>("#app")!;
 app.innerHTML = `${header("explorer")}
 <main id="main"><section class="hero"><div class="eyebrow"><span class="dot"></span> YOUR CODE. YOUR SPECS. EVERY BRANCH.</div><h1>Your APIs,<br><span>an open book.</span></h1><p>Turn a public repository into a readable API reference.<br>Choose a branch. Explore the specs. Stay close to the code.</p>
-<form id="repo-form"><label for="repo-input">PUBLIC GITHUB REPOSITORY</label><div class="input-row"><span aria-hidden="true">⌘</span><input id="repo-input" placeholder="github.com/owner/repository" autocomplete="off" required aria-label="Public GitHub repository"><button type="submit">Open repository <span>↗</span></button></div></form>
+<form id="repo-form"><label for="repo-input">PUBLIC GIT REPOSITORY</label><div class="input-row"><span aria-hidden="true">⌘</span><input id="repo-input" placeholder="github.com/owner/repo or gitlab.com/group/repo" autocomplete="off" required aria-label="Public GitHub, GitLab, or Bitbucket repository"><button type="submit">Open repository <span>↗</span></button></div></form>
 <div class="try">Try it with <a id="example" href="/explorer.html?repo=ipondnakab%2Fspeckub&amp;branch=feat%2Fcrud-deep-path-playground&amp;endpoint=projects.list">Playground · projects.list ↗</a><span>Public repos · No sign-in needed</span></div></section>
 <div id="status" role="status" aria-live="polite"></div><section id="workspace" hidden><div class="repo-bar"><div><span class="eyebrow">REPOSITORY</span><h2 id="repo-name"></h2></div><div class="branch-control"><label for="branch">Branch</label><select id="branch"></select><button id="refresh" class="secondary">Refresh</button></div></div><div id="snapshot"></div><details id="issues" hidden><summary></summary><ul></ul></details>
 <div class="reader"><aside><label class="eyebrow" for="search">API REFERENCE</label><input id="search" type="search" placeholder="Search endpoints…"><label class="sr-only" for="method">HTTP method</label><select id="method"><option value="">All methods</option></select><div class="navigation-settings">
@@ -55,7 +56,7 @@ function status(message: string, error = false) {
 function share() {
   if (!repo) return;
   const p = new URLSearchParams({
-    repo: repo.full,
+    repo: repo.provider && repo.provider !== "github" ? `https://${repo.provider === "gitlab" ? "gitlab.com" : "bitbucket.org"}/${repo.full}` : repo.full,
     branch: el<HTMLSelectElement>("branch").value,
   });
   if (selected) p.set("endpoint", selected);
@@ -88,14 +89,14 @@ async function connect() {
   status("Opening repository…");
   try {
     const result = await openRepo(
-      input.value.replace(/^github\.com\//, "https://github.com/"),
+      input.value,
       signal,
     );
     signal.throwIfAborted();
     const requested =
-      result.repo.full === repo?.full
+      result.repo.full === repo?.full && result.repo.provider === repo?.provider
         ? activeBranch
-        : params.get("repo") === result.repo.full
+        : (params.get("repo") ? (() => { try { const p = parseRemote(params.get("repo")!); return p.full === result.repo.full && p.provider === (result.repo.provider ?? "github"); } catch { return false; } })() : false)
           ? params.get("branch")
           : null;
     const branch =
@@ -107,7 +108,7 @@ async function connect() {
       branches: result.branches,
       branch,
       selected:
-        result.repo.full === repo?.full
+        result.repo.full === repo?.full && result.repo.provider === repo?.provider
           ? selected
           : params.get("repo") === result.repo.full
             ? (params.get("endpoint") ?? "")

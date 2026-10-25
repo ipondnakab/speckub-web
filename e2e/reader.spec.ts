@@ -45,7 +45,7 @@ test("browse, render diagrams, switch branch, filter and deep-link", async ({
     fullPage: true,
   });
   await page
-    .getByRole("textbox", { name: "Public GitHub repository" })
+    .getByRole("textbox", { name: "Public GitHub, GitLab, or Bitbucket repository" })
     .fill("demo/api");
   await page.getByRole("button", { name: "Open repository" }).click();
   await expect(
@@ -456,7 +456,7 @@ test("failed new branch and repository loads preserve the displayed snapshot ide
     "Previously loaded contract",
   );
   await page
-    .getByRole("textbox", { name: "Public GitHub repository" })
+    .getByRole("textbox", { name: "Public GitHub, GitLab, or Bitbucket repository" })
     .fill("demo/another");
   await page.getByRole("button", { name: "Open repository" }).click();
   await expect(page.locator("#status")).toContainText(
