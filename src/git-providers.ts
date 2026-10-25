@@ -31,6 +31,12 @@ export function parseRemote(input: string): ParsedRemote {
   return { provider, full: path };
 }
 type Entry = { path: string; size?: number; symlink?: boolean };
+type GitLabMeta = { path_with_namespace: string; default_branch: string; visibility: string };
+type BitbucketMeta = { full_name: string; mainbranch?: { name: string }; is_private: boolean };
+type GitLabCommit = { id: string };
+type BitbucketCommit = { hash: string };
+type GitLabTreeItem = { path: string; type: string; mode?: string };
+type BitbucketItem = { name?: string; path: string; type: string; size?: number; attributes?: string[] };
 type Adapter = {
   metadata(full: string, signal: AbortSignal): Promise<{ full: string; defaultBranch: string; private: boolean }>;
   branches(full: string, signal: AbortSignal): Promise<string[]>;
@@ -64,19 +70,19 @@ async function pages<T>(url: (page: number) => string, signal: AbortSignal, limi
 }
 const gitlab: Adapter = {
   async metadata(full, signal) {
-    const d = await json(`https://gitlab.com/api/v4/projects/${enc(full)}`, signal);
+    const d = await json(`https://gitlab.com/api/v4/projects/${enc(full)}`, signal) as GitLabMeta;
     return { full: d.path_with_namespace, defaultBranch: d.default_branch, private: d.visibility !== "public" };
   },
   async branches(full, signal) {
-    const items = await pages<any>(p => `https://gitlab.com/api/v4/projects/${enc(full)}/repository/branches?per_page=100&page=${p}`, signal);
+    const items = await pages<{ name: string }>(p => `https://gitlab.com/api/v4/projects/${enc(full)}/repository/branches?per_page=100&page=${p}`, signal);
     return items.map(x => x.name);
   },
   async revision(full, branch, signal) {
-    const d = await json(`https://gitlab.com/api/v4/projects/${enc(full)}/repository/commits/${enc(branch)}`, signal);
+    const d = await json(`https://gitlab.com/api/v4/projects/${enc(full)}/repository/commits/${enc(branch)}`, signal) as GitLabCommit;
     return d.id;
   },
   async files(full, sha, signal) {
-    const items = await pages<any>(p => `https://gitlab.com/api/v4/projects/${enc(full)}/repository/tree?recursive=true&per_page=100&page=${p}&ref=${enc(sha)}`, signal, 50);
+    const items = await pages<GitLabTreeItem>(p => `https://gitlab.com/api/v4/projects/${enc(full)}/repository/tree?recursive=true&per_page=100&page=${p}&ref=${enc(sha)}`, signal, 50);
     return items.filter(x => x.type === "blob").map(x => ({ path: x.path, symlink: x.mode === "120000" }));
   },
   raw(full, sha, path) { return `https://gitlab.com/api/v4/projects/${enc(full)}/repository/files/${enc(path)}/raw?ref=${enc(sha)}`; },
@@ -84,14 +90,14 @@ const gitlab: Adapter = {
 };
 const bitbucket: Adapter = {
   async metadata(full, signal) {
-    const d = await json(`https://api.bitbucket.org/2.0/repositories/${full}`, signal);
+    const d = await json(`https://api.bitbucket.org/2.0/repositories/${full}`, signal) as BitbucketMeta;
     return { full: d.full_name, defaultBranch: d.mainbranch?.name, private: d.is_private };
   },
   async branches(full, signal) {
     return (await bbPages(`https://api.bitbucket.org/2.0/repositories/${full}/refs/branches?pagelen=100`, signal)).map(x => x.name);
   },
   async revision(full, branch, signal) {
-    const d = await json(`https://api.bitbucket.org/2.0/repositories/${full}/commits/${enc(branch)}`, signal);
+    const d = await json(`https://api.bitbucket.org/2.0/repositories/${full}/commits/${enc(branch)}`, signal) as BitbucketCommit;
     return d.hash;
   },
   async files(full, sha, signal) {
@@ -101,10 +107,10 @@ const bitbucket: Adapter = {
   raw(full, sha, path) { return `https://api.bitbucket.org/2.0/repositories/${full}/src/${enc(sha)}/${filePath(path)}`; },
   source(full, sha, path) { return `https://bitbucket.org/${full}/src/${enc(sha)}/${filePath(path)}`; },
 };
-async function bbPages(url: string, signal: AbortSignal): Promise<any[]> {
-  const result: any[] = [];
+async function bbPages(url: string, signal: AbortSignal): Promise<BitbucketItem[]> {
+  const result: BitbucketItem[] = [];
   for (let page = 0; url && page < 50; page++) {
-    const d = await json(url, signal);
+    const d = await json(url, signal) as { values: BitbucketItem[]; next?: string };
     if (!Array.isArray(d.values)) throw new Error("Unexpected Bitbucket response.");
     result.push(...d.values);
     if (!d.next) return result;
