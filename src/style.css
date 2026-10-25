@@ -742,3 +742,12 @@ article > h2 {
 .endpoint strong {
   align-self: start;
 }
+
+#status.warning {
+  background: #fff5df;
+  color: #815b13;
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}

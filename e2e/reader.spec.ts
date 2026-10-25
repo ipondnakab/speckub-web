@@ -318,3 +318,147 @@ test("list/tree switching caps visible layers without losing routes or selection
     fullPage: true,
   });
 });
+
+test("saved docs survive rate-limited refresh and reload without more API calls", async ({
+  page,
+}, testInfo) => {
+  let limited = false,
+    calls = 0;
+  await page.clock.install();
+  await page.route("https://api.github.com/**", async (route) => {
+    calls++;
+    const url = route.request().url();
+    if (limited)
+      return route.fulfill({
+        status: 403,
+        headers: {
+          "access-control-expose-headers":
+            "X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After",
+          "x-ratelimit-remaining": "0",
+          "x-ratelimit-reset": String(
+            Math.floor((Date.now() + 3600_000) / 1000),
+          ),
+        },
+        json: { message: "API rate limit exceeded" },
+      });
+    return route.fulfill({
+      json: url.includes("/branches?")
+        ? [{ name: "main" }]
+        : url.includes("/commits/")
+          ? { sha: "cached-browser", commit: { tree: { sha: "tree" } } }
+          : url.includes("/git/trees/")
+            ? {
+                truncated: false,
+                tree: [{ path: "api.md", type: "blob", mode: "100644" }],
+              }
+            : {
+                owner: { login: "demo" },
+                name: "cached",
+                full_name: "demo/cached",
+                default_branch: "main",
+              },
+    });
+  });
+  await page.route("https://raw.githubusercontent.com/**", (route) =>
+    route.fulfill({ body: text("Saved user contract") }),
+  );
+  await page.goto("/?repo=demo/cached");
+  await expect(page.locator("#document > h2")).toHaveText(
+    "Saved user contract",
+  );
+  expect(calls).toBe(4);
+  await page.reload();
+  await expect(page.locator("#document > h2")).toHaveText(
+    "Saved user contract",
+  );
+  expect(calls).toBe(4);
+  await page.clock.fastForward(6 * 60_000);
+  limited = true;
+  await page.getByRole("button", { name: "Refresh", exact: true }).click();
+  await expect(page.locator("#status")).toContainText("Showing saved data");
+  await expect(page.locator("#status")).toHaveClass("warning");
+  expect(calls).toBe(5);
+  await expect(page.locator("#document > h2")).toHaveText(
+    "Saved user contract",
+  );
+  await page.getByRole("button", { name: "Refresh", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Refresh", exact: true }),
+  ).toBeEnabled();
+  expect(calls).toBe(5);
+  await page.reload();
+  await expect(page.locator("#document > h2")).toHaveText(
+    "Saved user contract",
+  );
+  await expect(page.locator("#status")).toContainText("out of date");
+  expect(calls).toBe(5);
+  await expect(page.locator("#snapshot")).toContainText("cached");
+  await page.screenshot({
+    path: testInfo.outputPath("cached-during-rate-limit.png"),
+    fullPage: true,
+  });
+});
+
+test("failed new branch and repository loads preserve the displayed snapshot identity", async ({
+  page,
+}) => {
+  let limited = false;
+  await page.route("https://api.github.com/**", async (route) => {
+    const url = route.request().url();
+    if (limited)
+      return route.fulfill({
+        status: 429,
+        headers: {
+          "retry-after": "120",
+          "access-control-expose-headers": "Retry-After",
+        },
+        json: { message: "Rate limit exceeded" },
+      });
+    return route.fulfill({
+      json: url.includes("/branches?")
+        ? [{ name: "main" }, { name: "feature" }]
+        : url.includes("/commits/")
+          ? { sha: "previous-browser", commit: { tree: { sha: "tree" } } }
+          : url.includes("/git/trees/")
+            ? {
+                truncated: false,
+                tree: [{ path: "api.md", type: "blob", mode: "100644" }],
+              }
+            : {
+                owner: { login: "demo" },
+                name: "previous",
+                full_name: "demo/previous",
+                default_branch: "main",
+              },
+    });
+  });
+  await page.route("https://raw.githubusercontent.com/**", (route) =>
+    route.fulfill({ body: text("Previously loaded contract") }),
+  );
+  await page.goto("/?repo=demo/previous");
+  await expect(page.locator("#document > h2")).toHaveText(
+    "Previously loaded contract",
+  );
+  limited = true;
+  await page.getByLabel("Branch", { exact: true }).selectOption("feature");
+  await expect(page.locator("#status")).toContainText(
+    "Still showing demo/previous on branch main",
+  );
+  await expect(page.getByLabel("Branch", { exact: true })).toHaveValue("main");
+  await expect(page).toHaveURL(/branch=main/);
+  await expect(page.locator("#document > h2")).toHaveText(
+    "Previously loaded contract",
+  );
+  await page
+    .getByRole("textbox", { name: "Public GitHub repository" })
+    .fill("demo/another");
+  await page.getByRole("button", { name: "Open repository" }).click();
+  await expect(page.locator("#status")).toContainText(
+    "previously loaded documentation is still available",
+  );
+  await expect(page.locator("#workspace")).toBeVisible();
+  await expect(page.locator("#repo-name")).toHaveText("demo/previous");
+  await expect(page.locator("#document > h2")).toHaveText(
+    "Previously loaded contract",
+  );
+});

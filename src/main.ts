@@ -66,9 +66,24 @@ function start() {
   generation++;
   return controller.signal;
 }
+let availableBranches: string[] = [];
+let activeBranch = "";
+type LoadTarget = {
+  repo: Repo;
+  branches: string[];
+  branch: string;
+  selected: string;
+  warning?: string;
+};
+function busy(value: boolean) {
+  el<HTMLButtonElement>("refresh").disabled = value;
+  el<HTMLFormElement>("repo-form").querySelector<HTMLButtonElement>(
+    "button",
+  )!.disabled = value;
+}
 async function connect() {
   const signal = start();
-  el("workspace").hidden = true;
+  busy(true);
   status("Opening repository…");
   try {
     const result = await openRepo(
@@ -76,79 +91,108 @@ async function connect() {
       signal,
     );
     signal.throwIfAborted();
-    repo = result.repo;
+    const requested =
+      result.repo.full === repo?.full
+        ? activeBranch
+        : params.get("repo") === result.repo.full
+          ? params.get("branch")
+          : null;
+    const branch =
+      requested && result.branches.includes(requested)
+        ? requested
+        : result.repo.defaultBranch;
+    await readBranch({
+      repo: result.repo,
+      branches: result.branches,
+      branch,
+      selected:
+        result.repo.full === repo?.full
+          ? selected
+          : params.get("repo") === result.repo.full
+            ? (params.get("endpoint") ?? "")
+            : "",
+      warning: result.warning,
+    });
+  } catch (error) {
+    if (!signal.aborted)
+      status(
+        `${error instanceof Error ? error.message : "Unable to open repository."}${repo ? " Your previously loaded documentation is still available." : ""}`,
+        true,
+      );
+  } finally {
+    if (controller.signal === signal) busy(false);
+  }
+}
+async function readBranch(target?: LoadTarget, refresh = false) {
+  if (!target && !repo) return;
+  const request = target ?? {
+    repo: repo!,
+    branches: availableBranches,
+    branch: el<HTMLSelectElement>("branch").value,
+    selected,
+  };
+  const signal = start();
+  busy(true);
+  status(`Loading ${request.branch}…`);
+  try {
+    const result = await loadBranch(
+      request.repo,
+      request.branch,
+      signal,
+      (t) => status(t),
+      { refresh },
+    );
+    signal.throwIfAborted();
+    // Commit the repository, branch, and snapshot together only after a successful read.
+    repo = request.repo;
+    availableBranches = request.branches;
+    activeBranch = request.branch;
+    specs = result.specs;
+    sha = result.sha;
     el("repo-name").textContent = repo.full;
     const branch = el<HTMLSelectElement>("branch");
     branch.replaceChildren(
-      ...result.branches.map((name) => new Option(name, name)),
+      ...availableBranches.map((name) => new Option(name, name)),
     );
-    const requested =
-      params.get("repo") === repo.full ? params.get("branch") : null;
-    branch.value =
-      requested && result.branches.includes(requested)
-        ? requested
-        : repo.defaultBranch;
-    selected =
-      params.get("repo") === repo.full ? (params.get("endpoint") ?? "") : "";
+    branch.value = activeBranch;
     el("workspace").hidden = false;
     el("intro").hidden = true;
     document.body.classList.add("has-repo");
-    await readBranch();
-  } catch (e) {
-    if (!signal.aborted)
-      status(
-        e instanceof Error ? e.message : "Unable to open repository.",
-        true,
-      );
-  }
-}
-async function readBranch() {
-  if (!repo) return;
-  const signal = start();
-  specs = [];
-  el("endpoints").replaceChildren();
-  el("document").textContent = "Loading this branch…";
-  el("issues").hidden = true;
-  el("snapshot").textContent = "";
-  try {
-    const result = await loadBranch(
-      repo,
-      el<HTMLSelectElement>("branch").value,
-      signal,
-      (t) => status(t),
-    );
-    signal.throwIfAborted();
-    specs = result.specs;
-    sha = result.sha;
     el("snapshot").textContent =
-      `${specs.length} endpoints · ${result.filesRead} Markdown files read · commit ${sha.slice(0, 7)}`;
+      `${specs.length} endpoints · ${result.filesRead} Markdown files read · commit ${sha.slice(0, 7)} · branch ${activeBranch} · ${result.fromCache ? "cached, " : ""}checked ${new Date(result.checkedAt).toLocaleTimeString()}`;
+    el("issues").hidden = !result.issues.length;
     if (result.issues.length) {
-      el("issues").hidden = false;
       el("issues").querySelector("summary")!.textContent =
         `${result.issues.length} discovery issues — results may be incomplete`;
       el("issues")
         .querySelector("ul")!
         .replaceChildren(
-          ...result.issues.map((s) => {
+          ...result.issues.map((text) => {
             const li = document.createElement("li");
-            li.textContent = s;
+            li.textContent = text;
             return li;
           }),
         );
     }
-    selected = specs.some((s) => s.id === selected)
-      ? selected
+    selected = specs.some((s) => s.id === request.selected)
+      ? request.selected
       : (specs[0]?.id ?? "");
-    status("");
+    const notice = result.warning || request.warning || "";
+    status(notice);
+    if (notice) el("status").className = "warning";
     share();
     renderList(true);
     renderDoc();
-  } catch (e) {
+  } catch (error) {
     if (!signal.aborted) {
-      status(e instanceof Error ? e.message : "Could not load branch.", true);
-      el("document").textContent =
-        "This branch could not be loaded. Choose another branch or retry.";
+      el<HTMLSelectElement>("branch").value = activeBranch;
+      status(
+        `${error instanceof Error ? error.message : "Could not load branch."}${repo ? ` Still showing ${repo.full} on branch ${activeBranch}.` : ""}`,
+        true,
+      );
     }
+  } finally {
+    if (controller.signal === signal) busy(false);
   }
 }
 let preferences = loadNavigation();
@@ -411,10 +455,9 @@ el("example").onclick = () => {
   void connect();
 };
 el("branch").onchange = () => {
-  selected = "";
   void readBranch();
 };
-el("refresh").onclick = () => void readBranch();
+el("refresh").onclick = () => void readBranch(undefined, true);
 navigationView.onchange = updateNavigation;
 treeDepth.onchange = updateNavigation;
 el("search").oninput = () => renderList();
