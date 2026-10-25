@@ -1,4 +1,5 @@
 import { collect, eligible, type Spec } from "./discovery";
+import { parseRemote, openRemote, loadRemote, remoteSourceUrl, type Provider } from "./git-providers";
 import { endpointSchema } from "./contract";
 import { cached, remember } from "./github-cache";
 const minute = 60_000;
@@ -32,6 +33,7 @@ export type Repo = {
   name: string;
   full: string;
   defaultBranch: string;
+  provider?: Provider;
 };
 export function parseRepo(input: string): string {
   const value = input.trim().replace(/\/$/, "");
@@ -106,7 +108,9 @@ export async function openRepo(
   signal: AbortSignal,
 ): Promise<RepoInfo & { warning?: string }> {
   signal.throwIfAborted();
-  const full = parseRepo(input);
+  const parsed = parseRemote(input);
+  if (parsed.provider !== "github") return openRemote(input, signal);
+  const full = parseRepo(parsed.full);
   const key = `repo:${full.toLowerCase()}`;
   const hit = cached(key, isRepoInfo);
   if (hit) return hit.value;
@@ -191,6 +195,7 @@ export async function loadBranch(
   options: { refresh?: boolean } = {},
 ) {
   signal.throwIfAborted();
+  if (repo.provider && repo.provider !== "github") return loadRemote(repo as Repo & { provider: "gitlab" | "bitbucket" }, branch, signal, onProgress);
   const repoKey = repo.full.toLowerCase(),
     refKey = `branch:${repoKey}:${branch}`;
   const ref = cached(refKey, isRef, true);
@@ -343,5 +348,6 @@ async function readSnapshot(
   };
 }
 export function sourceUrl(repo: Repo, sha: string, path: string): string {
+  if (repo.provider && repo.provider !== "github") return remoteSourceUrl(repo as Repo & { provider: "gitlab" | "bitbucket" }, sha, path);
   return `https://github.com/${repo.full}/blob/${sha}/${path.split("/").map(encodeURIComponent).join("/")}`;
 }
