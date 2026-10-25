@@ -703,3 +703,42 @@ article > h2 {
 .path-children .endpoint {
   padding: 10px 6px;
 }
+
+.navigation-settings {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  margin-top: 14px;
+}
+.navigation-settings label {
+  display: block;
+  font-size: 11px;
+  color: #7f7780;
+  margin-bottom: 6px;
+}
+.navigation-settings select,
+.navigation-settings input {
+  width: 100%;
+  margin: 0;
+  min-width: 0;
+  font-size: 12px;
+  padding: 9px 10px;
+}
+.navigation-settings:has(#tree-depth-setting[hidden]) {
+  grid-template-columns: minmax(0, 1fr);
+}
+.endpoint strong,
+.endpoint small {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.endpoint {
+  grid-template-columns: 43px minmax(0, 1fr);
+}
+.endpoint strong {
+  align-self: start;
+}

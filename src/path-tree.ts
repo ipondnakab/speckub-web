@@ -44,3 +44,31 @@ export function pathTree<T extends PathEndpoint>(
   }
   return root;
 }
+
+export function branchEndpoints<T extends PathEndpoint>(
+  branch: PathBranch<T>,
+): T[] {
+  const endpoints: T[] = [];
+  const pending = [branch];
+  while (pending.length) {
+    const current = pending.pop()!;
+    endpoints.push(...current.endpoints);
+    pending.push(...current.children.values());
+  }
+  return endpoints.sort(
+    (a, b) =>
+      a.path.localeCompare(b.path) ||
+      a.method.localeCompare(b.method) ||
+      a.id.localeCompare(b.id),
+  );
+}
+
+export function navigationLabel(path: string, prefix = ""): string {
+  const relative = prefix ? path.slice(prefix.length) || "/" : path;
+  const segments = relative.slice(1).split("/");
+  if (segments.length <= 4) return relative;
+  const tail = segments.slice(-2).join("/");
+  return prefix
+    ? "…/" + tail
+    : "/" + segments.slice(0, 2).join("/") + "/…/" + tail;
+}

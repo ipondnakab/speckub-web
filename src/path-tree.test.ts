@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { pathTree } from "./path-tree";
+import { pathTree, branchEndpoints } from "./path-tree";
 it("groups shared paths, keeps parent endpoints and separates methods", () => {
   const input = [
     { id: "users.create", method: "POST", path: "/api/users" },
@@ -32,4 +32,15 @@ it("retains meaningful empty segments rather than merging distinct routes", () =
     tree.children.get("api")?.children.get("users")?.children.get("")
       ?.endpoints[0].id,
   ).toBe("b");
+});
+
+it("flattening a capped subtree keeps parent endpoints and every descendant once", () => {
+  const routes = [
+    { id: "a", method: "GET", path: "/api/users" },
+    { id: "b", method: "POST", path: "/api/users" },
+    { id: "c", method: "GET", path: "/api/users/{id}/orders/{orderId}/items" },
+  ];
+  const branch = pathTree(routes).children.get("api")!.children.get("users")!;
+  expect(branchEndpoints(branch).map((e) => e.id)).toEqual(["a", "b", "c"]);
+  expect(branch.count).toBe(3);
 });

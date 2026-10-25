@@ -1,4 +1,10 @@
-import { pathTree, type PathBranch } from "./path-tree";
+import { loadNavigation, saveNavigation } from "./navigation-preferences";
+import {
+  pathTree,
+  branchEndpoints,
+  navigationLabel,
+  type PathBranch,
+} from "./path-tree";
 import "./style.css";
 import mermaidUrl from "@mermaid-js/tiny/dist/mermaid.tiny.js?url";
 let renderer: Promise<Mermaid> | undefined;
@@ -24,7 +30,10 @@ app.innerHTML = `<header><a class="brand" href="/" aria-label="SpecKub home"><sv
 <form id="repo-form"><label for="repo-input">PUBLIC GITHUB REPOSITORY</label><div class="input-row"><span aria-hidden="true">⌘</span><input id="repo-input" placeholder="github.com/owner/repository" autocomplete="off" required aria-label="Public GitHub repository"><button type="submit">Open repository <span>↗</span></button></div></form>
 <div class="try">Try it with <button id="example">ipondnakab/speckub ↗</button><span>Public repos · No sign-in needed</span></div></section>
 <div id="status" role="status" aria-live="polite"></div><section id="workspace" hidden><div class="repo-bar"><div><span class="eyebrow">REPOSITORY</span><h2 id="repo-name"></h2></div><div class="branch-control"><label for="branch">Branch</label><select id="branch"></select><button id="refresh" class="secondary">Refresh</button></div></div><div id="snapshot"></div><details id="issues" hidden><summary></summary><ul></ul></details>
-<div class="reader"><aside><label class="eyebrow" for="search">API REFERENCE</label><input id="search" type="search" placeholder="Search endpoints…"><label class="sr-only" for="method">HTTP method</label><select id="method"><option value="">All methods</option>${["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"].map((m) => `<option>${m}</option>`).join("")}</select><div id="count"></div><nav id="endpoints" aria-label="Endpoints"></nav></aside><article id="document"></article></div></section>
+<div class="reader"><aside><label class="eyebrow" for="search">API REFERENCE</label><input id="search" type="search" placeholder="Search endpoints…"><label class="sr-only" for="method">HTTP method</label><select id="method"><option value="">All methods</option>${["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"].map((m) => `<option>${m}</option>`).join("")}</select><div class="navigation-settings">
+  <div><label for="navigation-view">View</label><select id="navigation-view"><option value="list">List</option><option value="tree">Tree</option></select></div>
+  <div id="tree-depth-setting" hidden><label for="tree-depth">Max tree layers</label><input id="tree-depth" type="number" min="1" max="12" step="1" value="2" title="Maximum visible folder levels (1–12)"></div>
+</div><div id="count"></div><nav id="endpoints" aria-label="Endpoints"></nav></aside><article id="document"></article></div></section>
 <section id="intro" class="intro"><div><span class="step">01 / CONNECT</span><h3>One link. Every endpoint.</h3><p>Discover SpecKub Markdown across your repository, wherever your team keeps it.</p></div><div><span class="step">02 / EXPLORE</span><h3>Follow the right branch.</h3><p>Read contracts, service relationships, and sequence diagrams for a specific revision.</p></div><div><span class="step">03 / SHARE</span><h3>Keep everyone in sync.</h3><p>Share a link to an endpoint. Your Markdown stays in Git, alongside the code.</p></div></section></main><footer><span>SpecKub / Open-source API documentation</span><span>Built for humans. Ready for agents.</span></footer>`;
 function el<T extends HTMLElement = HTMLElement>(id: string) {
   return document.getElementById(id)! as T;
@@ -142,10 +151,25 @@ async function readBranch() {
     }
   }
 }
+let preferences = loadNavigation();
+const navigationView = el<HTMLSelectElement>("navigation-view");
+const treeDepth = el<HTMLInputElement>("tree-depth");
+navigationView.value = preferences.view;
+treeDepth.value = String(preferences.depth);
+function updateNavigation() {
+  preferences = {
+    view: navigationView.value === "tree" ? "tree" : "list",
+    depth: Math.min(12, Math.max(1, Math.trunc(Number(treeDepth.value)) || 2)),
+  };
+  treeDepth.value = String(preferences.depth);
+  saveNavigation(preferences);
+  renderList(true);
+}
 const collapsedPaths = new Set<string>();
 let treeFiltered = false;
 function renderList(revealSelected = false) {
-  const q = el<HTMLInputElement>("search").value.toLowerCase();
+  el("tree-depth-setting").hidden = preferences.view !== "tree";
+  const q = el<HTMLInputElement>("search").value.trim().toLowerCase();
   const method = el<HTMLSelectElement>("method").value;
   const filtered = specs.filter(
     (s) =>
@@ -154,6 +178,7 @@ function renderList(revealSelected = false) {
   );
   el("count").textContent = `${filtered.length} endpoints`;
   const nav = el("endpoints");
+  nav.dataset.view = preferences.view;
   if (!treeFiltered) {
     for (const group of nav.querySelectorAll<HTMLDetailsElement>(
       "details[data-path]",
@@ -165,7 +190,7 @@ function renderList(revealSelected = false) {
   treeFiltered = Boolean(q || method);
   nav.replaceChildren();
   const selectedPath = specs.find((s) => s.id === selected)?.path;
-  function renderEndpoint(s: Spec, container: HTMLElement) {
+  function renderEndpoint(s: Spec, container: HTMLElement, prefix = "") {
     const b = document.createElement("button");
     b.className = `endpoint ${s.id === selected ? "active" : ""}`;
     b.setAttribute("aria-current", s.id === selected ? "true" : "false");
@@ -173,7 +198,7 @@ function renderList(revealSelected = false) {
     badge.className = `method ${s.method}`;
     badge.textContent = s.method;
     const path = document.createElement("strong");
-    path.textContent = s.path;
+    path.textContent = navigationLabel(s.path, prefix);
     const title = document.createElement("small");
     title.textContent = s.summary;
     b.append(badge, path, title);
@@ -184,15 +209,25 @@ function renderList(revealSelected = false) {
       renderDoc();
     };
     b.title = `${s.method} ${s.path}`;
+    b.setAttribute("aria-label", `${s.method} ${s.path} ${s.summary}`);
     container.append(b);
   }
-  function renderBranch(branch: PathBranch<Spec>, container: HTMLElement) {
+  function renderBranch(
+    branch: PathBranch<Spec>,
+    container: HTMLElement,
+    level = 0,
+  ) {
+    if (level >= preferences.depth) {
+      for (const endpoint of branchEndpoints(branch))
+        renderEndpoint(endpoint, container, branch.path);
+      return;
+    }
     for (const endpoint of branch.endpoints)
-      renderEndpoint(endpoint, container);
+      renderEndpoint(endpoint, container, branch.path);
     for (const child of branch.children.values()) {
       if (!child.children.size) {
         for (const endpoint of child.endpoints)
-          renderEndpoint(endpoint, container);
+          renderEndpoint(endpoint, container, branch.path);
         continue;
       }
       if (
@@ -205,6 +240,7 @@ function renderList(revealSelected = false) {
       const group = document.createElement("details");
       group.className = "path-group";
       group.dataset.path = child.path;
+      group.dataset.depth = String(level + 1);
       group.open = Boolean(q || method) || !collapsedPaths.has(child.path);
       const label = document.createElement("summary");
       label.className = "path-group-label";
@@ -218,12 +254,15 @@ function renderList(revealSelected = false) {
       label.append(segment, count);
       const children = document.createElement("div");
       children.className = "path-children";
-      renderBranch(child, children);
+      renderBranch(child, children, level + 1);
       group.append(label, children);
       container.append(group);
     }
   }
-  renderBranch(pathTree(filtered), nav);
+  const tree = pathTree(filtered);
+  if (preferences.view === "tree") renderBranch(tree, nav);
+  else
+    for (const endpoint of branchEndpoints(tree)) renderEndpoint(endpoint, nav);
   if (!filtered.length)
     el("endpoints").textContent = specs.length
       ? "No matching endpoints."
@@ -376,6 +415,8 @@ el("branch").onchange = () => {
   void readBranch();
 };
 el("refresh").onclick = () => void readBranch();
+navigationView.onchange = updateNavigation;
+treeDepth.onchange = updateNavigation;
 el("search").oninput = () => renderList();
 el("method").onchange = () => renderList();
 if (input.value) void connect();

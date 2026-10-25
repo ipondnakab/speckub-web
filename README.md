@@ -14,6 +14,14 @@ Paste a public GitHub repository URL, choose a branch, and browse its Markdown A
 4. Read custom sections, tables, and Mermaid diagrams. Source links point to the exact loaded commit.
 5. Click **Copy link** to share the repository, branch, and selected endpoint. Shared links follow the branch when reopened; source links are pinned to the loaded commit.
 
+Use **View** in the sidebar to switch between **List** (default) and **Tree**.
+Tree view starts at **2** folder layers. Set **Max tree layers** to **1–12**;
+deeper routes remain visible as entries under the last folder. Long labels
+abbreviate middle segments while preserving the full path in the document,
+accessible name, and tooltip. Filters and selection work in either mode.
+View and depth are saved in this browser when storage is available; denied or
+malformed storage falls back to List with a tree depth of 2.
+
 The reader does not generate API documentation. Use SpecKub's agent skills to scan APIs and create Markdown first. It works with documented APIs in any framework/language.
 
 ## Discovery and custom templates
