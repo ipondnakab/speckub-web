@@ -162,3 +162,37 @@ test("path tree keeps parent routes, multiple methods and filtered matches acces
   ).toBeVisible();
   await expect(page.locator('.endpoint[aria-current="true"]')).toBeVisible();
 });
+
+test("header logo and favicon have a transparent lightning cutout", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const colors = await page.evaluate(async () => {
+    const logo = document.querySelector<SVGSVGElement>(".brand-logo")!;
+    logo.setAttribute("width", "512");
+    logo.setAttribute("height", "512");
+    const sources = [
+      `data:image/svg+xml,${encodeURIComponent(new XMLSerializer().serializeToString(logo))}`,
+      document.querySelector<HTMLLinkElement>('link[rel="icon"]')!.href,
+    ];
+    return Promise.all(
+      sources.map(async (src) => {
+        const image = new Image();
+        image.src = src;
+        await image.decode();
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 512;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(image, 0, 0, 512, 512);
+        return {
+          cutout: [...ctx.getImageData(250, 100, 1, 1).data],
+          red: [...ctx.getImageData(50, 250, 1, 1).data],
+        };
+      }),
+    );
+  });
+  for (const pixels of colors) {
+    expect(pixels.cutout[3]).toBe(0);
+    expect(pixels.red).toEqual([223, 0, 56, 255]);
+  }
+});
