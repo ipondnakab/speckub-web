@@ -47,7 +47,7 @@ type Adapter = {
 };
 const enc = (s: string) => encodeURIComponent(s);
 const filePath = (s: string) => s.split("/").map(enc).join("/");
-async function json(url: string, signal: AbortSignal): Promise<any> {
+async function json(url: string, signal: AbortSignal): Promise<unknown> {
   signal.throwIfAborted();
   const response = await fetch(url, { signal, credentials: "omit", headers: { Accept: "application/json" } });
   if (!response.ok) {
