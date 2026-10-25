@@ -1,3 +1,4 @@
+import { pathTree, type PathBranch } from "./path-tree";
 import "./style.css";
 import mermaidUrl from "@mermaid-js/tiny/dist/mermaid.tiny.js?url";
 let renderer: Promise<Mermaid> | undefined;
@@ -131,7 +132,7 @@ async function readBranch() {
       : (specs[0]?.id ?? "");
     status("");
     share();
-    renderList();
+    renderList(true);
     renderDoc();
   } catch (e) {
     if (!signal.aborted) {
@@ -141,7 +142,9 @@ async function readBranch() {
     }
   }
 }
-function renderList() {
+const collapsedPaths = new Set<string>();
+let treeFiltered = false;
+function renderList(revealSelected = false) {
   const q = el<HTMLInputElement>("search").value.toLowerCase();
   const method = el<HTMLSelectElement>("method").value;
   const filtered = specs.filter(
@@ -150,28 +153,77 @@ function renderList() {
       `${s.id} ${s.path} ${s.summary} ${s.body}`.toLowerCase().includes(q),
   );
   el("count").textContent = `${filtered.length} endpoints`;
-  el("endpoints").replaceChildren(
-    ...filtered.map((s) => {
-      const b = document.createElement("button");
-      b.className = `endpoint ${s.id === selected ? "active" : ""}`;
-      b.setAttribute("aria-current", s.id === selected ? "true" : "false");
-      const badge = document.createElement("span");
-      badge.className = `method ${s.method}`;
-      badge.textContent = s.method;
-      const path = document.createElement("strong");
-      path.textContent = s.path;
-      const title = document.createElement("small");
-      title.textContent = s.summary;
-      b.append(badge, path, title);
-      b.onclick = () => {
-        selected = s.id;
-        share();
-        renderList();
-        renderDoc();
-      };
-      return b;
-    }),
-  );
+  const nav = el("endpoints");
+  if (!treeFiltered) {
+    for (const group of nav.querySelectorAll<HTMLDetailsElement>(
+      "details[data-path]",
+    )) {
+      if (group.open) collapsedPaths.delete(group.dataset.path!);
+      else collapsedPaths.add(group.dataset.path!);
+    }
+  }
+  treeFiltered = Boolean(q || method);
+  nav.replaceChildren();
+  const selectedPath = specs.find((s) => s.id === selected)?.path;
+  function renderEndpoint(s: Spec, container: HTMLElement) {
+    const b = document.createElement("button");
+    b.className = `endpoint ${s.id === selected ? "active" : ""}`;
+    b.setAttribute("aria-current", s.id === selected ? "true" : "false");
+    const badge = document.createElement("span");
+    badge.className = `method ${s.method}`;
+    badge.textContent = s.method;
+    const path = document.createElement("strong");
+    path.textContent = s.path;
+    const title = document.createElement("small");
+    title.textContent = s.summary;
+    b.append(badge, path, title);
+    b.onclick = () => {
+      selected = s.id;
+      share();
+      renderList(true);
+      renderDoc();
+    };
+    b.title = `${s.method} ${s.path}`;
+    container.append(b);
+  }
+  function renderBranch(branch: PathBranch<Spec>, container: HTMLElement) {
+    for (const endpoint of branch.endpoints)
+      renderEndpoint(endpoint, container);
+    for (const child of branch.children.values()) {
+      if (!child.children.size) {
+        for (const endpoint of child.endpoints)
+          renderEndpoint(endpoint, container);
+        continue;
+      }
+      if (
+        revealSelected &&
+        (selectedPath === child.path ||
+          selectedPath?.startsWith(child.path + "/"))
+      ) {
+        collapsedPaths.delete(child.path);
+      }
+      const group = document.createElement("details");
+      group.className = "path-group";
+      group.dataset.path = child.path;
+      group.open = Boolean(q || method) || !collapsedPaths.has(child.path);
+      const label = document.createElement("summary");
+      label.className = "path-group-label";
+      label.title = child.path;
+      const segment = document.createElement("span");
+      segment.className = "path-segment";
+      segment.textContent = child.segment || "/";
+      const count = document.createElement("span");
+      count.className = "path-count";
+      count.textContent = String(child.count);
+      label.append(segment, count);
+      const children = document.createElement("div");
+      children.className = "path-children";
+      renderBranch(child, children);
+      group.append(label, children);
+      container.append(group);
+    }
+  }
+  renderBranch(pathTree(filtered), nav);
   if (!filtered.length)
     el("endpoints").textContent = specs.length
       ? "No matching endpoints."
@@ -324,6 +376,6 @@ el("branch").onchange = () => {
   void readBranch();
 };
 el("refresh").onclick = () => void readBranch();
-el("search").oninput = renderList;
-el("method").onchange = renderList;
+el("search").oninput = () => renderList();
+el("method").onchange = () => renderList();
 if (input.value) void connect();

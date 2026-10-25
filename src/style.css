@@ -349,6 +349,7 @@ aside select {
   color: #768294;
 }
 .endpoint {
+  width: 100%;
   text-align: left;
   border: 1px solid transparent;
   border-radius: 7px;
@@ -667,4 +668,38 @@ article > h2 {
   .prose {
     font-size: 13px;
   }
+}
+
+/* Path hierarchy uses native details/summary for keyboard-accessible disclosure. */
+.path-group {
+  min-width: 0;
+}
+.path-group-label {
+  cursor: pointer;
+  padding: 9px 5px;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  color: #343238;
+}
+.path-group-label::marker {
+  color: var(--accent);
+}
+.path-segment {
+  margin-left: 3px;
+}
+.path-count {
+  float: right;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 10px;
+  color: #7f7780;
+  margin: 2px 0 0 8px;
+}
+.path-children {
+  margin-left: 7px;
+  padding-left: 7px;
+  border-left: 1px solid var(--line);
+}
+.path-children .endpoint {
+  padding: 10px 6px;
 }

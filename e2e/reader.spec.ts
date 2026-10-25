@@ -1,7 +1,9 @@
 import { test, expect } from "@playwright/test";
 const text = (name: string) =>
   `---\nspeckub: true\nspecVersion: 1\nid: users.read\nkind: http\nmethod: GET\npath: /users/{id}\nsummary: ${name}\n---\n## Our custom contract\n\n| Field | Type |\n| --- | --- |\n| id | string |\n\n\`\`\`mermaid\nsequenceDiagram\nClient->>API: Get user\nAPI-->>Client: User\n\`\`\`\n`;
-test("browse, render diagrams, switch branch, filter and deep-link", async ({ page }, testInfo) => {
+test("browse, render diagrams, switch branch, filter and deep-link", async ({
+  page,
+}, testInfo) => {
   await page.route("https://api.github.com/**", async (route) => {
     const url = route.request().url();
     let data: unknown = {};
@@ -87,4 +89,76 @@ test("browse, render diagrams, switch branch, filter and deep-link", async ({ pa
   await expect(
     page.getByRole("heading", { name: "Feature users", exact: true }),
   ).toBeVisible();
+});
+
+test("path tree keeps parent routes, multiple methods and filtered matches accessible", async ({
+  page,
+}) => {
+  const routes = [
+    ["users.list", "GET", "/api/users"],
+    ["users.create", "POST", "/api/users"],
+    ["users.read", "GET", "/api/users/{id}"],
+    ["orders.list", "GET", "/api/orders"],
+  ];
+  await page.route("https://api.github.com/**", async (route) => {
+    const url = route.request().url();
+    const json = url.includes("/branches?")
+      ? [{ name: "main" }]
+      : url.includes("/commits/")
+        ? { sha: "tree-case", commit: { tree: { sha: "tree" } } }
+        : url.includes("/git/trees/")
+          ? {
+              truncated: false,
+              tree: routes.map(([id]) => ({
+                path: `${id}.md`,
+                type: "blob",
+                mode: "100644",
+              })),
+            }
+          : {
+              owner: { login: "demo" },
+              name: "tree",
+              full_name: "demo/tree",
+              default_branch: "main",
+            };
+    await route.fulfill({ json });
+  });
+  await page.route("https://raw.githubusercontent.com/**", (route) => {
+    const id = route.request().url().split("/").at(-1)!.replace(".md", "");
+    const [, method, path] = routes.find((r) => r[0] === id)!;
+    return route.fulfill({
+      body: `---\nspeckub: true\nspecVersion: 1\nid: ${id}\nkind: http\nmethod: ${method}\npath: ${path}\nsummary: ${id}\n---\n## Contract\nExample.`,
+    });
+  });
+  await page.goto("/?repo=demo/tree");
+  const api = page.locator('details[data-path="/api"]');
+  const users = page.locator('details[data-path="/api/users"]');
+  await expect(api).toBeVisible();
+  await expect(users).toBeVisible();
+  await expect(users.locator(".endpoint")).toHaveCount(3);
+  await expect(users.locator(".path-count").first()).toHaveText("3");
+  await users.locator("summary").first().click();
+  await expect(users).not.toHaveAttribute("open");
+  await page.getByRole("searchbox").fill("users.read");
+  await expect(page.locator(".endpoint")).toHaveCount(1);
+  await expect(page.locator(".endpoint")).toBeVisible();
+  await page.getByRole("searchbox").fill("");
+  await expect(
+    page.locator('details[data-path="/api/users"]'),
+  ).not.toHaveAttribute("open");
+  await page.getByLabel("HTTP method", { exact: true }).selectOption("POST");
+  await expect(page.locator(".endpoint")).toHaveCount(1);
+  await expect(page.locator(".endpoint")).toContainText("POST");
+  await page.getByLabel("HTTP method", { exact: true }).selectOption("");
+  await page.locator('details[data-path="/api/users"] > summary').click();
+  await page
+    .getByRole("button", {
+      name: "GET /api/users/{id} users.read",
+      exact: true,
+    })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "users.read", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator('.endpoint[aria-current="true"]')).toBeVisible();
 });
