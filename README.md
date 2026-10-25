@@ -14,6 +14,14 @@ Paste a public GitHub repository URL, choose a branch, and browse its Markdown A
 4. Read custom sections, tables, and Mermaid diagrams. Source links point to the exact loaded commit.
 5. Click **Copy link** to share the repository, branch, and selected endpoint. Shared links follow the branch when reopened; source links are pinned to the loaded commit.
 
+Use **View** in the sidebar to switch between **List** (default) and **Tree**.
+Tree view starts at **2** folder layers. Set **Max tree layers** to **1–12**;
+deeper routes remain visible as entries under the last folder. Long labels
+abbreviate middle segments while preserving the full path in the document,
+accessible name, and tooltip. Filters and selection work in either mode.
+View and depth are saved in this browser when storage is available; denied or
+malformed storage falls back to List with a tree depth of 2.
+
 The reader does not generate API documentation. Use SpecKub's agent skills to scan APIs and create Markdown first. It works with documented APIs in any framework/language.
 
 ## Discovery and custom templates
@@ -69,7 +77,11 @@ The application is static. Requests go directly from the browser to GitHub; ther
 
 - Public GitHub repositories only. Do not enter credentials or private repository tokens.
 - GitHub's unauthenticated API quota applies (typically 60 requests/hour/IP). Branch lists paginate up to 1,000 branches.
-- Up to 500 eligible Markdown files, 500 KB per file, and a 20 MB download budget. Six concurrent reads; up to five commit snapshots cached in memory.
+- Up to 500 eligible Markdown files, 500 KB per file, and a 20 MB download budget. Six concurrent Markdown reads.
+- Repository/branch lists are cached for 5 minutes; branch-to-commit checks for 1 minute; immutable commit snapshots for up to 24 hours. **Refresh** rechecks the branch without re-downloading unchanged successful snapshots.
+- A bounded browser cache survives reloads (20 entries, 2,000,000 serialized characters total, 1,000,000 per entry). Larger snapshots may not fit. Storage denial/corruption falls back to memory/network behavior.
+- During quota errors or temporary network/server failures, saved data may be shown with its timestamp and a warning that it can be out of date. Failed repo/branch loads keep the previous document and its original identity visible. Permission/404 errors are not silently treated as successful cached reads.
+- Rate-limit responses honor GitHub's reset/Retry-After headers and prevent further API requests during cooldown. Caching reduces repeated requests; it does not raise the anonymous quota. A first uncached visit can still require waiting until reset.
 - Truncated GitHub trees are rejected rather than silently presented as complete.
 - Remote images and raw HTML are disabled. Mermaid uses strict security mode and a text size limit; unsupported diagrams retain their source.
 - Google Fonts is used for typography with system fallbacks. The app fetches GitHub metadata and raw files, but never executes repository code.

@@ -1,3 +1,10 @@
+import { loadNavigation, saveNavigation } from "./navigation-preferences";
+import {
+  pathTree,
+  branchEndpoints,
+  navigationLabel,
+  type PathBranch,
+} from "./path-tree";
 import "./style.css";
 import mermaidUrl from "@mermaid-js/tiny/dist/mermaid.tiny.js?url";
 let renderer: Promise<Mermaid> | undefined;
@@ -18,12 +25,15 @@ import type { Spec } from "./discovery";
 import { openRepo, loadBranch, sourceUrl, type Repo } from "./github";
 import { renderMarkdown } from "./markdown";
 const app = document.querySelector<HTMLDivElement>("#app")!;
-app.innerHTML = `<header><a class="brand" href="/" aria-label="SpecKub home"><span class="brand-icon">s<span>k</span></span>SpecKub<span class="brand-label">EXPLORER</span></a><a class="github-link" href="https://github.com/ipondnakab/speckub" target="_blank" rel="noreferrer">About SpecKub ↗</a></header>
+app.innerHTML = `<header><a class="brand" href="/" aria-label="SpecKub home"><svg class="brand-logo" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#df0038" fill-rule="evenodd" d="M96 0h320a96 96 0 0 1 96 96v320a96 96 0 0 1-96 96H96a96 96 0 0 1-96-96V96A96 96 0 0 1 96 0Z M297 0h28L217 217l236-78-276 373 118-296-236 78Z"/></svg>SpecKub<span class="brand-label">EXPLORER</span></a><a class="github-link" href="https://github.com/ipondnakab/speckub" target="_blank" rel="noreferrer">About SpecKub ↗</a></header>
 <main><section class="hero"><div class="eyebrow"><span class="dot"></span> YOUR CODE. YOUR SPECS. EVERY BRANCH.</div><h1>Your APIs,<br><span>an open book.</span></h1><p>Turn a public repository into a readable API reference.<br>Choose a branch. Explore the specs. Stay close to the code.</p>
 <form id="repo-form"><label for="repo-input">PUBLIC GITHUB REPOSITORY</label><div class="input-row"><span aria-hidden="true">⌘</span><input id="repo-input" placeholder="github.com/owner/repository" autocomplete="off" required aria-label="Public GitHub repository"><button type="submit">Open repository <span>↗</span></button></div></form>
 <div class="try">Try it with <button id="example">ipondnakab/speckub ↗</button><span>Public repos · No sign-in needed</span></div></section>
 <div id="status" role="status" aria-live="polite"></div><section id="workspace" hidden><div class="repo-bar"><div><span class="eyebrow">REPOSITORY</span><h2 id="repo-name"></h2></div><div class="branch-control"><label for="branch">Branch</label><select id="branch"></select><button id="refresh" class="secondary">Refresh</button></div></div><div id="snapshot"></div><details id="issues" hidden><summary></summary><ul></ul></details>
-<div class="reader"><aside><label class="eyebrow" for="search">API REFERENCE</label><input id="search" type="search" placeholder="Search endpoints…"><label class="sr-only" for="method">HTTP method</label><select id="method"><option value="">All methods</option>${["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"].map((m) => `<option>${m}</option>`).join("")}</select><div id="count"></div><nav id="endpoints" aria-label="Endpoints"></nav></aside><article id="document"></article></div></section>
+<div class="reader"><aside><label class="eyebrow" for="search">API REFERENCE</label><input id="search" type="search" placeholder="Search endpoints…"><label class="sr-only" for="method">HTTP method</label><select id="method"><option value="">All methods</option></select><div class="navigation-settings">
+  <div><label for="navigation-view">View</label><select id="navigation-view"><option value="list">List</option><option value="tree">Tree</option></select></div>
+  <div id="tree-depth-setting" hidden><label for="tree-depth">Max tree layers</label><input id="tree-depth" type="number" min="1" max="12" step="1" value="2" title="Maximum visible folder levels (1–12)"></div>
+</div><div id="count"></div><nav id="endpoints" aria-label="Endpoints"></nav></aside><article id="document"></article></div></section>
 <section id="intro" class="intro"><div><span class="step">01 / CONNECT</span><h3>One link. Every endpoint.</h3><p>Discover SpecKub Markdown across your repository, wherever your team keeps it.</p></div><div><span class="step">02 / EXPLORE</span><h3>Follow the right branch.</h3><p>Read contracts, service relationships, and sequence diagrams for a specific revision.</p></div><div><span class="step">03 / SHARE</span><h3>Keep everyone in sync.</h3><p>Share a link to an endpoint. Your Markdown stays in Git, alongside the code.</p></div></section></main><footer><span>SpecKub / Open-source API documentation</span><span>Built for humans. Ready for agents.</span></footer>`;
 function el<T extends HTMLElement = HTMLElement>(id: string) {
   return document.getElementById(id)! as T;
@@ -56,9 +66,24 @@ function start() {
   generation++;
   return controller.signal;
 }
+let availableBranches: string[] = [];
+let activeBranch = "";
+type LoadTarget = {
+  repo: Repo;
+  branches: string[];
+  branch: string;
+  selected: string;
+  warning?: string;
+};
+function busy(value: boolean) {
+  el<HTMLButtonElement>("refresh").disabled = value;
+  el<HTMLFormElement>("repo-form").querySelector<HTMLButtonElement>(
+    "button",
+  )!.disabled = value;
+}
 async function connect() {
   const signal = start();
-  el("workspace").hidden = true;
+  busy(true);
   status("Opening repository…");
   try {
     const result = await openRepo(
@@ -66,83 +91,139 @@ async function connect() {
       signal,
     );
     signal.throwIfAborted();
-    repo = result.repo;
+    const requested =
+      result.repo.full === repo?.full
+        ? activeBranch
+        : params.get("repo") === result.repo.full
+          ? params.get("branch")
+          : null;
+    const branch =
+      requested && result.branches.includes(requested)
+        ? requested
+        : result.repo.defaultBranch;
+    await readBranch({
+      repo: result.repo,
+      branches: result.branches,
+      branch,
+      selected:
+        result.repo.full === repo?.full
+          ? selected
+          : params.get("repo") === result.repo.full
+            ? (params.get("endpoint") ?? "")
+            : "",
+      warning: result.warning,
+    });
+  } catch (error) {
+    if (!signal.aborted)
+      status(
+        `${error instanceof Error ? error.message : "Unable to open repository."}${repo ? " Your previously loaded documentation is still available." : ""}`,
+        true,
+      );
+  } finally {
+    if (controller.signal === signal) busy(false);
+  }
+}
+async function readBranch(target?: LoadTarget, refresh = false) {
+  if (!target && !repo) return;
+  const request = target ?? {
+    repo: repo!,
+    branches: availableBranches,
+    branch: el<HTMLSelectElement>("branch").value,
+    selected,
+  };
+  const signal = start();
+  busy(true);
+  status(`Loading ${request.branch}…`);
+  try {
+    const result = await loadBranch(
+      request.repo,
+      request.branch,
+      signal,
+      (t) => status(t),
+      { refresh },
+    );
+    signal.throwIfAborted();
+    // Commit the repository, branch, and snapshot together only after a successful read.
+    repo = request.repo;
+    availableBranches = request.branches;
+    activeBranch = request.branch;
+    specs = result.specs;
+    const methodFilter = el<HTMLSelectElement>("method");
+    const previousMethod = methodFilter.value;
+    const methods = [...new Set(specs.map((spec) => spec.method))].sort();
+    methodFilter.replaceChildren(
+      new Option("All methods", ""),
+      ...methods.map((method) => new Option(method, method)),
+    );
+    methodFilter.value = methods.some((method) => method === previousMethod)
+      ? previousMethod
+      : "";
+    sha = result.sha;
     el("repo-name").textContent = repo.full;
     const branch = el<HTMLSelectElement>("branch");
     branch.replaceChildren(
-      ...result.branches.map((name) => new Option(name, name)),
+      ...availableBranches.map((name) => new Option(name, name)),
     );
-    const requested =
-      params.get("repo") === repo.full ? params.get("branch") : null;
-    branch.value =
-      requested && result.branches.includes(requested)
-        ? requested
-        : repo.defaultBranch;
-    selected =
-      params.get("repo") === repo.full ? (params.get("endpoint") ?? "") : "";
+    branch.value = activeBranch;
     el("workspace").hidden = false;
     el("intro").hidden = true;
     document.body.classList.add("has-repo");
-    await readBranch();
-  } catch (e) {
-    if (!signal.aborted)
-      status(
-        e instanceof Error ? e.message : "Unable to open repository.",
-        true,
-      );
-  }
-}
-async function readBranch() {
-  if (!repo) return;
-  const signal = start();
-  specs = [];
-  el("endpoints").replaceChildren();
-  el("document").textContent = "Loading this branch…";
-  el("issues").hidden = true;
-  el("snapshot").textContent = "";
-  try {
-    const result = await loadBranch(
-      repo,
-      el<HTMLSelectElement>("branch").value,
-      signal,
-      (t) => status(t),
-    );
-    signal.throwIfAborted();
-    specs = result.specs;
-    sha = result.sha;
     el("snapshot").textContent =
-      `${specs.length} endpoints · ${result.filesRead} Markdown files read · commit ${sha.slice(0, 7)}`;
+      `${specs.length} endpoints · ${result.filesRead} Markdown files read · commit ${sha.slice(0, 7)} · branch ${activeBranch} · ${result.fromCache ? "cached, " : ""}checked ${new Date(result.checkedAt).toLocaleTimeString()}`;
+    el("issues").hidden = !result.issues.length;
     if (result.issues.length) {
-      el("issues").hidden = false;
       el("issues").querySelector("summary")!.textContent =
         `${result.issues.length} discovery issues — results may be incomplete`;
       el("issues")
         .querySelector("ul")!
         .replaceChildren(
-          ...result.issues.map((s) => {
+          ...result.issues.map((text) => {
             const li = document.createElement("li");
-            li.textContent = s;
+            li.textContent = text;
             return li;
           }),
         );
     }
-    selected = specs.some((s) => s.id === selected)
-      ? selected
+    selected = specs.some((s) => s.id === request.selected)
+      ? request.selected
       : (specs[0]?.id ?? "");
-    status("");
+    const notice = result.warning || request.warning || "";
+    status(notice);
+    if (notice) el("status").className = "warning";
     share();
-    renderList();
+    renderList(true);
     renderDoc();
-  } catch (e) {
+  } catch (error) {
     if (!signal.aborted) {
-      status(e instanceof Error ? e.message : "Could not load branch.", true);
-      el("document").textContent =
-        "This branch could not be loaded. Choose another branch or retry.";
+      el<HTMLSelectElement>("branch").value = activeBranch;
+      status(
+        `${error instanceof Error ? error.message : "Could not load branch."}${repo ? ` Still showing ${repo.full} on branch ${activeBranch}.` : ""}`,
+        true,
+      );
     }
+  } finally {
+    if (controller.signal === signal) busy(false);
   }
 }
-function renderList() {
-  const q = el<HTMLInputElement>("search").value.toLowerCase();
+let preferences = loadNavigation();
+const navigationView = el<HTMLSelectElement>("navigation-view");
+const treeDepth = el<HTMLInputElement>("tree-depth");
+navigationView.value = preferences.view;
+treeDepth.value = String(preferences.depth);
+function updateNavigation() {
+  preferences = {
+    view: navigationView.value === "tree" ? "tree" : "list",
+    depth: Math.min(12, Math.max(1, Math.trunc(Number(treeDepth.value)) || 2)),
+  };
+  treeDepth.value = String(preferences.depth);
+  saveNavigation(preferences);
+  renderList(true);
+}
+const collapsedPaths = new Set<string>();
+let treeFiltered = false;
+function renderList(revealSelected = false) {
+  el("tree-depth-setting").hidden = preferences.view !== "tree";
+  const q = el<HTMLInputElement>("search").value.trim().toLowerCase();
   const method = el<HTMLSelectElement>("method").value;
   const filtered = specs.filter(
     (s) =>
@@ -150,28 +231,92 @@ function renderList() {
       `${s.id} ${s.path} ${s.summary} ${s.body}`.toLowerCase().includes(q),
   );
   el("count").textContent = `${filtered.length} endpoints`;
-  el("endpoints").replaceChildren(
-    ...filtered.map((s) => {
-      const b = document.createElement("button");
-      b.className = `endpoint ${s.id === selected ? "active" : ""}`;
-      b.setAttribute("aria-current", s.id === selected ? "true" : "false");
-      const badge = document.createElement("span");
-      badge.className = `method ${s.method}`;
-      badge.textContent = s.method;
-      const path = document.createElement("strong");
-      path.textContent = s.path;
-      const title = document.createElement("small");
-      title.textContent = s.summary;
-      b.append(badge, path, title);
-      b.onclick = () => {
-        selected = s.id;
-        share();
-        renderList();
-        renderDoc();
-      };
-      return b;
-    }),
-  );
+  const nav = el("endpoints");
+  nav.dataset.view = preferences.view;
+  if (!treeFiltered) {
+    for (const group of nav.querySelectorAll<HTMLDetailsElement>(
+      "details[data-path]",
+    )) {
+      if (group.open) collapsedPaths.delete(group.dataset.path!);
+      else collapsedPaths.add(group.dataset.path!);
+    }
+  }
+  treeFiltered = Boolean(q || method);
+  nav.replaceChildren();
+  const selectedPath = specs.find((s) => s.id === selected)?.path;
+  function renderEndpoint(s: Spec, container: HTMLElement, prefix = "") {
+    const b = document.createElement("button");
+    b.className = `endpoint ${s.id === selected ? "active" : ""}`;
+    b.setAttribute("aria-current", s.id === selected ? "true" : "false");
+    const badge = document.createElement("span");
+    badge.className = `method ${s.method}`;
+    badge.textContent = s.method;
+    const path = document.createElement("strong");
+    path.textContent = navigationLabel(s.path, prefix);
+    const title = document.createElement("small");
+    title.textContent = s.summary;
+    b.append(badge, path, title);
+    b.onclick = () => {
+      selected = s.id;
+      share();
+      renderList(true);
+      renderDoc();
+    };
+    b.title = `${s.method} ${s.path}`;
+    b.setAttribute("aria-label", `${s.method} ${s.path} ${s.summary}`);
+    container.append(b);
+  }
+  function renderBranch(
+    branch: PathBranch<Spec>,
+    container: HTMLElement,
+    level = 0,
+  ) {
+    if (level >= preferences.depth) {
+      for (const endpoint of branchEndpoints(branch))
+        renderEndpoint(endpoint, container, branch.path);
+      return;
+    }
+    for (const endpoint of branch.endpoints)
+      renderEndpoint(endpoint, container, branch.path);
+    for (const child of branch.children.values()) {
+      if (!child.children.size) {
+        for (const endpoint of child.endpoints)
+          renderEndpoint(endpoint, container, branch.path);
+        continue;
+      }
+      if (
+        revealSelected &&
+        (selectedPath === child.path ||
+          selectedPath?.startsWith(child.path + "/"))
+      ) {
+        collapsedPaths.delete(child.path);
+      }
+      const group = document.createElement("details");
+      group.className = "path-group";
+      group.dataset.path = child.path;
+      group.dataset.depth = String(level + 1);
+      group.open = Boolean(q || method) || !collapsedPaths.has(child.path);
+      const label = document.createElement("summary");
+      label.className = "path-group-label";
+      label.title = child.path;
+      const segment = document.createElement("span");
+      segment.className = "path-segment";
+      segment.textContent = child.segment || "/";
+      const count = document.createElement("span");
+      count.className = "path-count";
+      count.textContent = String(child.count);
+      label.append(segment, count);
+      const children = document.createElement("div");
+      children.className = "path-children";
+      renderBranch(child, children, level + 1);
+      group.append(label, children);
+      container.append(group);
+    }
+  }
+  const tree = pathTree(filtered);
+  if (preferences.view === "tree") renderBranch(tree, nav);
+  else
+    for (const endpoint of branchEndpoints(tree)) renderEndpoint(endpoint, nav);
   if (!filtered.length)
     el("endpoints").textContent = specs.length
       ? "No matching endpoints."
@@ -320,10 +465,11 @@ el("example").onclick = () => {
   void connect();
 };
 el("branch").onchange = () => {
-  selected = "";
   void readBranch();
 };
-el("refresh").onclick = () => void readBranch();
-el("search").oninput = renderList;
-el("method").onchange = renderList;
+el("refresh").onclick = () => void readBranch(undefined, true);
+navigationView.onchange = updateNavigation;
+treeDepth.onchange = updateNavigation;
+el("search").oninput = () => renderList();
+el("method").onchange = () => renderList();
 if (input.value) void connect();
