@@ -781,3 +781,21 @@ select,
     background-image: none;
   }
 }
+
+.reader-site-nav {
+  display: flex;
+  gap: 24px;
+  font-size: 13px;
+}
+.reader-site-nav a {
+  color: #667085;
+}
+.reader-site-nav a[aria-current] {
+  color: var(--accent);
+}
+@media (max-width: 760px) {
+  .reader-site-nav {
+    gap: 14px;
+    font-size: 11px;
+  }
+}

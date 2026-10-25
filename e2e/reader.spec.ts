@@ -39,7 +39,7 @@ test("browse, render diagrams, switch branch, filter and deep-link", async ({
       ),
     }),
   );
-  await page.goto("/");
+  await page.goto("/explorer.html");
   await page.screenshot({
     path: testInfo.outputPath("landing.png"),
     fullPage: true,

@@ -1,8 +1,16 @@
-# SpecKub Web
+# SpecKub — introduction, docs, and explorer
 
 [Open the reader](https://speckub-web.vercel.app) · [Try the SpecKub repository](https://speckub-web.vercel.app/?repo=ipondnakab%2Fspeckub)
 
-A public API reference reader for [SpecKub](https://github.com/ipondnakab/speckub).
+The public website for [SpecKub](https://github.com/ipondnakab/speckub), with a product introduction, practical documentation, and an API reference explorer.
+
+## Site pages
+
+- `/`: introduction, workflow, use cases, and quickstart.
+- `/docs.html`: complete user guide: setup, agent skills, templates, metadata, JSON examples, validation, private/public readers, CLI reference, and troubleshooting.
+- `/explorer.html`: the public GitHub repository reader.
+
+Existing `/?repo=owner/repo&branch=main&endpoint=ID` links continue to open the reader. Introduction and docs are bundled static content; viewing them does not call GitHub APIs. Edit `content/guide.md` to update the guide. Heading anchors and the section navigation are generated at build/runtime from this bundled Markdown; no external CMS is required.
 
 Paste a public GitHub repository URL, choose a branch, and browse its Markdown API specifications. Specs remain in their original repository; no upload or account is required.
 
