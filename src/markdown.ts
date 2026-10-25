@@ -1,7 +1,9 @@
+import { configureTables } from "./tables";
 import MarkdownIt from "markdown-it";
 import type { Repo } from "./github";
 import { sourceUrl } from "./github";
 const md = new MarkdownIt({ html: false, linkify: false });
+configureTables(md);
 md.renderer.rules.image = (tokens, i) =>
   `<span class="image-placeholder">[Image: ${md.utils.escapeHtml(tokens[i].content)}]</span>`;
 const fence = md.renderer.rules.fence!;

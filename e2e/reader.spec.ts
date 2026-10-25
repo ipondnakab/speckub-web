@@ -39,7 +39,7 @@ test("browse, render diagrams, switch branch, filter and deep-link", async ({
       ),
     }),
   );
-  await page.goto("/");
+  await page.goto("/explorer.html");
   await page.screenshot({
     path: testInfo.outputPath("landing.png"),
     fullPage: true,
@@ -173,6 +173,7 @@ test("header logo and favicon have a transparent lightning cutout", async ({
   page,
 }) => {
   await page.goto("/");
+  await expect(page.locator(".brand-logo")).toBeVisible();
   const colors = await page.evaluate(async () => {
     const logo = document.querySelector<SVGSVGElement>(".brand-logo")!;
     logo.setAttribute("width", "512");
@@ -466,4 +467,117 @@ test("failed new branch and repository loads preserve the displayed snapshot ide
   await expect(page.locator("#document > h2")).toHaveText(
     "Previously loaded contract",
   );
+});
+
+test("playground example opens its branch and endpoint with readable wide tables", async ({
+  page,
+}, testInfo) => {
+  const branch = "feat/crud-deep-path-playground";
+  const requestedCommits: string[] = [];
+  await page.route("https://api.github.com/**", async (route) => {
+    const url = route.request().url();
+    let json: unknown;
+    if (url.includes("/branches?")) json = [{ name: "main" }, { name: branch }];
+    else if (url.includes("/commits/")) {
+      requestedCommits.push(decodeURIComponent(url));
+      json = { sha: "playground-sha", commit: { tree: { sha: "tree" } } };
+    } else if (url.includes("/git/trees/"))
+      json = {
+        truncated: false,
+        tree: [
+          { path: "docs/api/projects/list.md", type: "blob", mode: "100644" },
+        ],
+      };
+    else
+      json = {
+        owner: { login: "ipondnakab" },
+        name: "speckub",
+        full_name: "ipondnakab/speckub",
+        default_branch: "main",
+      };
+    await route.fulfill({ json });
+  });
+  await page.route("https://raw.githubusercontent.com/**", (route) =>
+    route.fulfill({
+      body: `---
+speckub: true
+specVersion: 1
+id: projects.list
+kind: http
+method: GET
+path: /api/organizations/{organizationId}/projects
+summary: List organization projects
+---
+## Request
+
+| Field | Location | Type | Required / nullable | Constraints / default | Meaning |
+| --- | --- | --- | --- | --- | --- |
+| organizationId | Path | string | Required, non-null | One nonempty segment; no default | Exact ID scoped to its parent |
+
+Query parameters are ignored.
+`,
+    }),
+  );
+  await page.goto("/explorer.html");
+  const example = page.getByRole("link", {
+    name: "Playground · projects.list",
+  });
+  await expect(example).toHaveAttribute(
+    "href",
+    "/explorer.html?repo=ipondnakab%2Fspeckub&branch=feat%2Fcrud-deep-path-playground&endpoint=projects.list",
+  );
+  await example.click();
+  await expect(
+    page.getByRole("heading", {
+      name: "List organization projects",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Branch", { exact: true })).toHaveValue(branch);
+  await expect(page).toHaveURL(/endpoint=projects.list/);
+  expect(
+    requestedCommits.some((url) => url.endsWith(`/commits/${branch}`)),
+  ).toBe(true);
+  for (const width of [390, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    const region = page.getByRole("region", { name: "Scrollable data table" });
+    await region.scrollIntoViewIfNeeded();
+    await expect(region.getByRole("columnheader")).toHaveText([
+      "Field",
+      "Location",
+      "Type",
+      "Required / nullable",
+      "Constraints / default",
+      "Meaning",
+    ]);
+    expect(
+      await region
+        .locator("th")
+        .first()
+        .evaluate((th) => th.getBoundingClientRect().width),
+    ).toBeGreaterThan(100);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBe(true);
+    if (width === 390) {
+      expect(
+        await region.evaluate(
+          (element) => element.scrollWidth > element.clientWidth,
+        ),
+      ).toBe(true);
+      await region.focus();
+      await page.keyboard.press("ArrowRight");
+      await expect
+        .poll(() => region.evaluate((element) => element.scrollLeft))
+        .toBeGreaterThan(0);
+      await region.evaluate((element) => {
+        element.scrollLeft = 0;
+      });
+    }
+    await page.screenshot({
+      path: testInfo.outputPath(`readable-table-${width}.png`),
+    });
+  }
 });
