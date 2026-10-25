@@ -91,10 +91,10 @@ const gitlab: Adapter = {
 const bitbucket: Adapter = {
   async metadata(full, signal) {
     const d = await json(`https://api.bitbucket.org/2.0/repositories/${full}`, signal) as BitbucketMeta;
-    return { full: d.full_name, defaultBranch: d.mainbranch?.name, private: d.is_private };
+    return { full: d.full_name, defaultBranch: d.mainbranch?.name ?? "", private: d.is_private };
   },
   async branches(full, signal) {
-    return (await bbPages(`https://api.bitbucket.org/2.0/repositories/${full}/refs/branches?pagelen=100`, signal)).map(x => x.name);
+    return (await bbPages(`https://api.bitbucket.org/2.0/repositories/${full}/refs/branches?pagelen=100`, signal)).map(x => x.name).filter((name): name is string => typeof name === "string");
   },
   async revision(full, branch, signal) {
     const d = await json(`https://api.bitbucket.org/2.0/repositories/${full}/commits/${enc(branch)}`, signal) as BitbucketCommit;
