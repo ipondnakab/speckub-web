@@ -1,12 +1,12 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
 :root {
   font-family: "DM Sans", system-ui, sans-serif;
-  color: #202936;
-  background: #f8f9fb;
+  color: #202024;
+  background: #fbfafb;
   font-synthesis: none;
   font-weight: 400;
-  --blue: #3159df;
-  --line: #e0e5ec;
+  --accent: #cf0034;
+  --line: #e6e3e5;
 }
 * {
   box-sizing: border-box;
@@ -28,7 +28,7 @@ button {
   cursor: pointer;
 }
 a {
-  color: var(--blue);
+  color: var(--accent);
   text-decoration: none;
 }
 a:hover {
@@ -38,7 +38,7 @@ button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 3px solid #9cb3ff;
+  outline: 3px solid #ed7091;
   outline-offset: 3px;
 }
 header {
@@ -55,7 +55,7 @@ header {
   display: flex;
   gap: 12px;
   align-items: center;
-  color: #182334;
+  color: #19191c;
   font-family: Manrope, system-ui, sans-serif;
   font-size: 23px;
   font-weight: 800;
@@ -63,21 +63,11 @@ header {
 .brand:hover {
   text-decoration: none;
 }
-.brand-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--blue);
-  color: white;
+.brand-logo {
   width: 38px;
   height: 38px;
-  border-radius: 10px;
-  font-size: 23px;
-  letter-spacing: -4px;
-  padding-right: 4px;
-}
-.brand-icon span {
-  opacity: 0.65;
+  display: block;
+  flex-shrink: 0;
 }
 .brand-label {
   font-size: 10px;
@@ -114,9 +104,9 @@ main {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #4875ed;
+  background: #df0038;
   margin-right: 7px;
-  box-shadow: 0 0 0 4px #e8eeff;
+  box-shadow: 0 0 0 4px #ffe4eb;
 }
 h1 {
   font-family: Manrope, system-ui, sans-serif;
@@ -127,7 +117,7 @@ h1 {
   margin: 24px 0;
 }
 h1 span {
-  color: var(--blue);
+  color: var(--accent);
 }
 .hero > p {
   color: #6a7484;
@@ -155,7 +145,7 @@ form label {
   border: 1px solid #d8dfe9;
   border-radius: 12px;
   padding: 8px;
-  box-shadow: 0 5px 18px #28365b08;
+  box-shadow: 0 5px 18px #3b102008;
   gap: 8px;
 }
 .input-row > span {
@@ -173,7 +163,7 @@ form label {
 }
 .input-row button {
   border: 0;
-  background: var(--blue);
+  background: var(--accent);
   color: white;
   border-radius: 8px;
   padding: 15px 18px;
@@ -241,8 +231,8 @@ footer {
 #status:not(:empty) {
   padding: 16px 20px;
   border-radius: 8px;
-  background: #eaf0ff;
-  color: #3159a5;
+  background: #fff0f4;
+  color: #a10029;
   margin-bottom: 24px;
   font-size: 14px;
 }
@@ -326,7 +316,7 @@ select {
 }
 aside {
   padding: 25px 16px;
-  background: #fafbfd;
+  background: #fcfafb;
   border-right: 1px solid var(--line);
 }
 aside > label {
@@ -370,11 +360,11 @@ aside select {
   color: #4b5870;
 }
 .endpoint.active {
-  background: #edf1ff;
-  border-color: #dce4ff;
+  background: #fff0f4;
+  border-color: #f4bbca;
 }
 .endpoint:hover {
-  background: #f0f3fa;
+  background: #fff5f7;
 }
 .endpoint strong {
   font:
@@ -442,7 +432,7 @@ article > h2 {
   padding: 15px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fafbfd;
+  background: #fcfafb;
   overflow-wrap: anywhere;
 }
 .route code {
@@ -471,7 +461,7 @@ article > h2 {
   padding: 3px 6px;
 }
 .toc button:hover {
-  color: var(--blue);
+  color: var(--accent);
 }
 .prose {
   font-size: 14px;
@@ -499,7 +489,7 @@ article > h2 {
 }
 .prose pre {
   overflow: auto;
-  background: #f5f7fa;
+  background: #f8f5f6;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 18px;
@@ -525,10 +515,10 @@ article > h2 {
   text-align: left;
 }
 .prose th {
-  background: #f6f8fb;
+  background: #faf5f7;
 }
 .prose blockquote {
-  border-left: 3px solid #c6d3ff;
+  border-left: 3px solid #ed9db2;
   margin-left: 0;
   padding: 3px 20px;
   color: #778395;
