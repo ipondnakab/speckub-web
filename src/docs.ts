@@ -1,7 +1,10 @@
+import { injectSpeedInsights } from "@vercel/speed-insights";
 import "./site.css";
 import { renderGuide } from "./guide";
 import guide from "../content/guide.md?raw";
 import { header, footer, installCopyButtons } from "./site";
+
+injectSpeedInsights();
 const { html: content, sections } = renderGuide(guide);
 const app = document.querySelector<HTMLDivElement>("#app")!;
 app.innerHTML = `${header("docs")}<main id="main" class="docs-layout"><aside class="docs-sidebar"><p class="site-eyebrow">DOCUMENTATION</p><nav aria-label="Documentation sections"></nav><a class="docs-explorer-link" href="/explorer.html">Open the explorer ↗</a></aside><article class="docs-content"><p class="site-eyebrow">THE SPECKUB GUIDE</p>${content}</article></main>${footer}`;
