@@ -1,3 +1,4 @@
+import { injectSpeedInsights } from "@vercel/speed-insights";
 import { header } from "./site";
 import { loadNavigation, saveNavigation } from "./navigation-preferences";
 import {
@@ -8,6 +9,8 @@ import {
 } from "./path-tree";
 import "./style.css";
 import mermaidUrl from "@mermaid-js/tiny/dist/mermaid.tiny.js?url";
+
+injectSpeedInsights();
 let renderer: Promise<Mermaid> | undefined;
 function loadMermaid(): Promise<Mermaid> {
   return (renderer ??= new Promise((resolve, reject) => {
