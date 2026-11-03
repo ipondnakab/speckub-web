@@ -58,7 +58,7 @@ See [development conventions](docs/development.md) for page boundaries, document
 
 ## Local development
 
-Requires Node.js 22.12+.
+Requires Node.js 24.x.
 
 ```sh
 yarn install --frozen-lockfile
@@ -81,7 +81,7 @@ yarn test:e2e
 
 ## Deploy to Vercel
 
-Import `ipondnakab/speckub-web` in Vercel. Use the **Next.js** preset and repository root. Use `yarn install --frozen-lockfile` to install and `yarn build` to build; leave the output directory at its framework default (`.next`). Remove any previous Vite/dist overrides from the Vercel project settings. No environment variables or secrets are required at this stage. Connect the GitHub repository for automatic deployments and PR previews.
+Import `ipondnakab/speckub-web` in Vercel. Use the **Next.js** preset and repository root. Use `yarn install --frozen-lockfile` to install and `yarn build` to build; the tracked `vercel.json` explicitly sets the output directory to `.next`, overriding any saved Vite `dist` setting. Set the project Node.js version to **24.x**, matching `package.json` and CI. No environment variables or secrets are required at this stage. Connect the GitHub repository for automatic deployments and PR previews.
 
 Next.js handles routing, server rendering, legacy URL redirects, and basic security headers. The explorer still requests public GitHub data directly from the browser; authentication and private repository creation are a separate next step. No GitHub tokens are stored. Mermaid is self-hosted and loaded through `next/script`; reader query parameters use `next/navigation`. A Node.js runtime is required; this project does not use Next.js static export.
 
