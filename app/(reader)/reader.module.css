@@ -1,7 +1,4 @@
-@import "./tables.css";
-@import "./header.css";
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
-:root {
+.page {
   font-family: "DM Sans", system-ui, sans-serif;
   color: #202024;
   background: #fbfafb;
@@ -10,58 +7,58 @@
   --accent: #cf0034;
   --line: #e6e3e5;
 }
-* {
+:where(.page) :global(*) {
   box-sizing: border-box;
 }
-body {
+.page {
   margin: 0;
 }
-button,
-input,
-select {
+:where(.page) :global(button),
+:where(.page) :global(input),
+:where(.page) :global(select) {
   font: inherit;
 }
-button,
-a,
-select {
+:where(.page) :global(button),
+:where(.page) :global(a),
+:where(.page) :global(select) {
   -webkit-tap-highlight-color: transparent;
 }
-button {
+:where(.page) :global(button) {
   cursor: pointer;
 }
-a {
+:where(.page) :global(a) {
   color: var(--accent);
   text-decoration: none;
 }
-a:hover {
+:where(.page) :global(a:hover) {
   text-decoration: underline;
 }
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible {
+:where(.page) :global(button:focus-visible),
+:where(.page) :global(a:focus-visible),
+:where(.page) :global(input:focus-visible),
+:where(.page) :global(select:focus-visible) {
   outline: 3px solid #ed7091;
   outline-offset: 3px;
 }
-main {
+:where(.page) :global(main) {
   max-width: 1256px;
   margin: auto;
   padding: 0 36px;
 }
-.hero {
+:where(.page) :global(.hero) {
   padding: 82px 0 65px;
   max-width: 800px;
   margin: auto;
   text-align: center;
 }
-.eyebrow {
+:where(.page) :global(.eyebrow) {
   font-size: 10px;
   letter-spacing: 1.7px;
   font-weight: 700;
   color: #768294;
   line-height: 1.6;
 }
-.dot {
+:where(.page) :global(.dot) {
   display: inline-block;
   width: 7px;
   height: 7px;
@@ -70,7 +67,7 @@ main {
   margin-right: 7px;
   box-shadow: 0 0 0 4px #ffe4eb;
 }
-h1 {
+:where(.page) :global(h1) {
   font-family: Manrope, system-ui, sans-serif;
   font-size: clamp(42px, 5vw, 68px);
   font-weight: 800;
@@ -78,21 +75,21 @@ h1 {
   line-height: 1.11;
   margin: 24px 0;
 }
-h1 span {
+:where(.page) :global(h1 span) {
   color: var(--accent);
 }
-.hero > p {
+:where(.page) :global(.hero > p) {
   color: #6a7484;
   line-height: 1.8;
   font-size: 16px;
   margin: 0 0 34px;
 }
-form {
+:where(.page) :global(form) {
   max-width: 694px;
   margin: auto;
   text-align: left;
 }
-form label {
+:where(.page) :global(form label) {
   font-size: 10px;
   letter-spacing: 1.4px;
   font-weight: 700;
@@ -100,7 +97,7 @@ form label {
   display: block;
   margin-bottom: 10px;
 }
-.input-row {
+:where(.page) :global(.input-row) {
   display: flex;
   align-items: center;
   background: white;
@@ -110,12 +107,12 @@ form label {
   box-shadow: 0 5px 18px #3b102008;
   gap: 8px;
 }
-.input-row > span {
+:where(.page) :global(.input-row > span) {
   padding-left: 12px;
   color: #8a94a5;
   font-size: 24px;
 }
-.input-row input {
+:where(.page) :global(.input-row input) {
   flex: 1;
   min-width: 0;
   border: 0;
@@ -123,7 +120,7 @@ form label {
   padding: 13px 6px;
   font-size: 14px;
 }
-.input-row button {
+:where(.page) :global(.input-row button) {
   border: 0;
   background: var(--accent);
   color: white;
@@ -133,10 +130,10 @@ form label {
   font-weight: 600;
   white-space: nowrap;
 }
-.input-row button span {
+:where(.page) :global(.input-row button span) {
   margin-left: 10px;
 }
-.try {
+:where(.page) :global(.try) {
   max-width: 694px;
   margin: 15px auto 0;
   display: flex;
@@ -145,17 +142,17 @@ form label {
   color: #8892a0;
   font-size: 11px;
 }
-.try a {
+:where(.page) :global(.try a) {
   border: 0;
   background: transparent;
   padding: 0;
   color: #52627b;
   font-size: 11px;
 }
-.try > span {
+:where(.page) :global(.try > span) {
   margin-left: auto;
 }
-.intro {
+:where(.page) :global(.intro) {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   border-top: 1px solid var(--line);
@@ -164,24 +161,24 @@ form label {
   gap: 42px;
   margin-bottom: 60px;
 }
-.step {
+:where(.page) :global(.step) {
   color: #8a94a4;
   font-size: 10px;
   letter-spacing: 1.6px;
 }
-h3 {
+:where(.page) :global(h3) {
   font-size: 17px;
   font-weight: 600;
   margin: 16px 0 10px;
 }
-.intro p {
+:where(.page) :global(.intro p) {
   font-size: 13px;
   line-height: 1.8;
   color: #7a8494;
   margin: 0;
   max-width: 300px;
 }
-footer {
+:where(.page) :global(footer) {
   max-width: 1256px;
   margin: auto;
   padding: 25px 36px;
@@ -190,7 +187,7 @@ footer {
   font-size: 11px;
   color: #8b94a1;
 }
-#status:not(:empty) {
+:where(.page) :global(#status:not(:empty)) {
   padding: 16px 20px;
   border-radius: 8px;
   background: #fff0f4;
@@ -198,50 +195,50 @@ footer {
   margin-bottom: 24px;
   font-size: 14px;
 }
-#status.error {
+:where(.page) :global(#status.error) {
   background: #fff1ed;
   color: #9d3e25;
 }
-.has-repo .hero {
+:where(.page) :global(.has-repo .hero) {
   padding: 35px 0 28px;
   max-width: 100%;
   text-align: left;
 }
-.has-repo .hero > h1,
-.has-repo .hero > p,
-.has-repo .hero > .eyebrow,
-.has-repo .try {
+:where(.page) :global(.has-repo .hero > h1),
+:where(.page) :global(.has-repo .hero > p),
+:where(.page) :global(.has-repo .hero > .eyebrow),
+:where(.page) :global(.has-repo .try) {
   display: none;
 }
-.has-repo form {
+:where(.page) :global(.has-repo form) {
   max-width: 100%;
 }
-.repo-bar {
+:where(.page) :global(.repo-bar) {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 20px 0 10px;
 }
-.repo-bar h2 {
+:where(.page) :global(.repo-bar h2) {
   font-family: Manrope, system-ui, sans-serif;
   font-size: 22px;
   margin: 4px 0;
 }
-.branch-control {
+:where(.page) :global(.branch-control) {
   display: flex;
   align-items: center;
   gap: 10px;
   font-size: 12px;
   color: #7a8494;
 }
-select {
+:where(.page) :global(select) {
   background: white;
   border: 1px solid var(--line);
   border-radius: 7px;
   color: #33415a;
   padding: 9px 12px;
 }
-.secondary {
+:where(.page) :global(.secondary) {
   background: white;
   border: 1px solid var(--line);
   border-radius: 7px;
@@ -249,12 +246,12 @@ select {
   font-size: 12px;
   padding: 9px 12px;
 }
-#snapshot {
+:where(.page) :global(#snapshot) {
   font-size: 11px;
   color: #8a94a5;
   margin-bottom: 22px;
 }
-#issues {
+:where(.page) :global(#issues) {
   padding: 15px;
   background: #fff5df;
   border-radius: 8px;
@@ -262,10 +259,10 @@ select {
   font-size: 12px;
   overflow-wrap: anywhere;
 }
-#issues summary {
+:where(.page) :global(#issues summary) {
   cursor: pointer;
 }
-.reader {
+:where(.page) :global(.reader) {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
   border: 1px solid var(--line);
@@ -275,16 +272,16 @@ select {
   min-height: 620px;
   margin-bottom: 35px;
 }
-aside {
+:where(.page) :global(aside) {
   padding: 25px 16px;
   background: #fcfafb;
   border-right: 1px solid var(--line);
 }
-aside > label {
+:where(.page) :global(aside > label) {
   display: block;
   margin-bottom: 13px;
 }
-aside input {
+:where(.page) :global(aside input) {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 7px;
@@ -292,24 +289,24 @@ aside input {
   font-size: 12px;
   background: white;
 }
-aside select {
+:where(.page) :global(aside select) {
   width: 100%;
   margin-top: 10px;
   font-size: 12px;
 }
-#count {
+:where(.page) :global(#count) {
   color: #939cab;
   font-size: 11px;
   margin: 23px 8px 12px;
 }
-#endpoints {
+:where(.page) :global(#endpoints) {
   display: flex;
   flex-direction: column;
   gap: 5px;
   font-size: 13px;
   color: #768294;
 }
-.endpoint {
+:where(.page) :global(.endpoint) {
   width: 100%;
   text-align: left;
   border: 1px solid transparent;
@@ -321,14 +318,14 @@ aside select {
   gap: 7px;
   color: #4b5870;
 }
-.endpoint.active {
+:where(.page) :global(.endpoint.active) {
   background: #fff0f4;
   border-color: #f4bbca;
 }
-.endpoint:hover {
+:where(.page) :global(.endpoint:hover) {
   background: #fff5f7;
 }
-.endpoint strong {
+:where(.page) :global(.endpoint strong) {
   font:
     11px ui-monospace,
     SFMono-Regular,
@@ -336,13 +333,13 @@ aside select {
   align-self: center;
   overflow-wrap: anywhere;
 }
-.endpoint small {
+:where(.page) :global(.endpoint small) {
   grid-column: 2;
   color: #7f8a9c;
   font-size: 11px;
   line-height: 1.5;
 }
-.method {
+:where(.page) :global(.method) {
   flex-shrink: 0;
   white-space: nowrap;
   font:
@@ -356,40 +353,40 @@ aside select {
   width: max-content;
   align-self: start;
 }
-.GET {
+:where(.page) :global(.GET) {
   color: #21836b;
   background: #e7f5ee;
 }
-.POST {
+:where(.page) :global(.POST) {
   color: #3159c9;
   background: #e9efff;
 }
-.DELETE {
+:where(.page) :global(.DELETE) {
   color: #b84b5d;
   background: #fcecef;
 }
-.PUT,
-.PATCH {
+:where(.page) :global(.PUT),
+:where(.page) :global(.PATCH) {
   color: #a17520;
   background: #fff3da;
 }
-article {
+:where(.page) :global(article) {
   padding: 35px 42px;
   min-width: 0;
 }
-.doc-top {
+:where(.page) :global(.doc-top) {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
 }
-article > h2 {
+:where(.page) :global(article > h2) {
   font-family: Manrope, system-ui, sans-serif;
   font-size: 29px;
   letter-spacing: -0.8px;
   margin: 22px 0;
 }
-.route {
+:where(.page) :global(.route) {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -399,18 +396,18 @@ article > h2 {
   background: #fcfafb;
   overflow-wrap: anywhere;
 }
-.route code {
+:where(.page) :global(.route code) {
   min-width: 0;
   font-size: 13px;
 }
-.file-link {
+:where(.page) :global(.file-link) {
   display: block;
   font-size: 11px;
   color: #8390a4;
   margin: 13px 0 24px;
   overflow-wrap: anywhere;
 }
-.toc {
+:where(.page) :global(.toc) {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -418,41 +415,41 @@ article > h2 {
   border-block: 1px solid var(--line);
   margin-bottom: 25px;
 }
-.toc button {
+:where(.page) :global(.toc button) {
   background: none;
   border: 0;
   color: #65738a;
   font-size: 11px;
   padding: 3px 6px;
 }
-.toc button:hover {
+:where(.page) :global(.toc button:hover) {
   color: var(--accent);
 }
-.prose {
+:where(.page) :global(.prose) {
   font-size: 14px;
   line-height: 1.8;
   color: #526075;
   overflow-wrap: anywhere;
 }
-.prose h1,
-.prose h2,
-.prose h3 {
+:where(.page) :global(.prose h1),
+:where(.page) :global(.prose h2),
+:where(.page) :global(.prose h3) {
   color: #26354a;
   font-family: Manrope, system-ui, sans-serif;
   letter-spacing: -0.4px;
   scroll-margin-top: 25px;
 }
-.prose h1 {
+:where(.page) :global(.prose h1) {
   font-size: 26px;
 }
-.prose h2 {
+:where(.page) :global(.prose h2) {
   font-size: 21px;
   margin-top: 30px;
 }
-.prose h3 {
+:where(.page) :global(.prose h3) {
   font-size: 17px;
 }
-.prose pre {
+:where(.page) :global(.prose pre) {
   overflow: auto;
   background: #f8f5f6;
   border: 1px solid var(--line);
@@ -462,167 +459,167 @@ article > h2 {
   line-height: 1.7;
   white-space: pre;
 }
-.prose code {
+:where(.page) :global(.prose code) {
   font-family: ui-monospace, SFMono-Regular, monospace;
   font-size: 0.9em;
 }
-.prose th,
-.prose td {
+:where(.page) :global(.prose th),
+:where(.page) :global(.prose td) {
   padding: 10px 14px;
   border: 1px solid var(--line);
   text-align: left;
 }
-.prose th {
+:where(.page) :global(.prose th) {
   background: #faf5f7;
 }
-.prose blockquote {
+:where(.page) :global(.prose blockquote) {
   border-left: 3px solid #ed9db2;
   margin-left: 0;
   padding: 3px 20px;
   color: #778395;
 }
-.diagram {
+:where(.page) :global(.diagram) {
   overflow: auto;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 10px;
 }
-.diagram svg {
+:where(.page) :global(.diagram svg) {
   min-width: 350px;
   max-width: 100%;
   height: auto;
 }
-.prose details summary {
+:where(.page) :global(.prose details summary) {
   font-size: 11px;
   color: #8290a3;
   cursor: pointer;
   margin-top: 8px;
 }
-.sources {
+:where(.page) :global(.sources) {
   border-top: 1px solid var(--line);
   margin-top: 30px;
   padding-top: 10px;
 }
-.sources h3 {
+:where(.page) :global(.sources h3) {
   font-size: 13px;
 }
-.sources a {
+:where(.page) :global(.sources a) {
   display: block;
   font-size: 12px;
   padding: 5px 0;
   overflow-wrap: anywhere;
 }
-.empty {
+:where(.page) :global(.empty) {
   padding: 55px 0;
   color: #7b8698;
   line-height: 1.8;
 }
-.empty h2 {
+:where(.page) :global(.empty h2) {
   color: #33415a;
   font-size: 24px;
 }
-.sr-only {
+:where(.page) :global(.sr-only) {
   position: absolute;
   width: 1px;
   height: 1px;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
 }
-[hidden] {
+:where(.page) :global([hidden]) {
   display: none !important;
 }
 @media (max-width: 760px) {
-  main {
+  :where(.page) :global(main) {
     padding: 0 20px;
   }
-  .hero {
+  :where(.page) :global(.hero) {
     padding: 50px 0 40px;
   }
-  h1 {
+  :where(.page) :global(h1) {
     letter-spacing: -2px;
   }
-  .hero > p {
+  :where(.page) :global(.hero > p) {
     font-size: 14px;
   }
-  .input-row {
+  :where(.page) :global(.input-row) {
     flex-wrap: wrap;
   }
-  .input-row input {
+  :where(.page) :global(.input-row input) {
     font-size: 12px;
   }
-  .input-row button {
+  :where(.page) :global(.input-row button) {
     width: 100%;
   }
-  .try {
+  :where(.page) :global(.try) {
     flex-wrap: wrap;
     line-height: 1.8;
   }
-  .try > span {
+  :where(.page) :global(.try > span) {
     width: 100%;
     margin: 0;
   }
-  .intro {
+  :where(.page) :global(.intro) {
     grid-template-columns: 1fr;
     gap: 25px;
     padding: 30px 0;
     margin-bottom: 20px;
   }
-  .intro p {
+  :where(.page) :global(.intro p) {
     max-width: none;
   }
-  .intro h3 {
+  :where(.page) :global(.intro h3) {
     margin-top: 9px;
   }
-  footer {
+  :where(.page) :global(footer) {
     padding: 20px;
     gap: 15px;
     flex-wrap: wrap;
   }
-  .repo-bar {
+  :where(.page) :global(.repo-bar) {
     align-items: flex-start;
     gap: 15px;
     flex-direction: column;
   }
-  .branch-control {
+  :where(.page) :global(.branch-control) {
     flex-wrap: wrap;
   }
-  .branch-control {
+  :where(.page) :global(.branch-control) {
     width: 100%;
   }
-  .branch-control select {
+  :where(.page) :global(.branch-control select) {
     flex: 1;
     min-width: 0;
   }
-  .reader {
+  :where(.page) :global(.reader) {
     grid-template-columns: 1fr;
   }
-  aside {
+  :where(.page) :global(aside) {
     border-right: 0;
     border-bottom: 1px solid var(--line);
   }
-  #endpoints {
+  :where(.page) :global(#endpoints) {
     max-height: 230px;
     overflow: auto;
   }
-  article {
+  :where(.page) :global(article) {
     padding: 25px 20px;
   }
-  article > h2 {
+  :where(.page) :global(article > h2) {
     font-size: 25px;
   }
-  .doc-top {
+  :where(.page) :global(.doc-top) {
     flex-wrap: wrap;
   }
-  .prose {
+  :where(.page) :global(.prose) {
     font-size: 13px;
   }
 }
 
 /* Path hierarchy uses native details/summary for keyboard-accessible disclosure. */
-.path-group {
+:where(.page) :global(.path-group) {
   min-width: 0;
 }
-.path-group-label {
+:where(.page) :global(.path-group-label) {
   cursor: pointer;
   padding: 9px 5px;
   font-family: ui-monospace, monospace;
@@ -630,53 +627,53 @@ article > h2 {
   overflow-wrap: anywhere;
   color: #343238;
 }
-.path-group-label::marker {
+:where(.page) :global(.path-group-label::marker) {
   color: var(--accent);
 }
-.path-segment {
+:where(.page) :global(.path-segment) {
   margin-left: 3px;
 }
-.path-count {
+:where(.page) :global(.path-count) {
   float: right;
   font-family: ui-sans-serif, system-ui, sans-serif;
   font-size: 10px;
   color: #7f7780;
   margin: 2px 0 0 8px;
 }
-.path-children {
+:where(.page) :global(.path-children) {
   margin-left: 7px;
   padding-left: 7px;
   border-left: 1px solid var(--line);
 }
-.path-children .endpoint {
+:where(.page) :global(.path-children .endpoint) {
   padding: 10px 6px;
 }
 
-.navigation-settings {
+:where(.page) :global(.navigation-settings) {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 10px;
   margin-top: 14px;
 }
-.navigation-settings label {
+:where(.page) :global(.navigation-settings label) {
   display: block;
   font-size: 11px;
   color: #7f7780;
   margin-bottom: 6px;
 }
-.navigation-settings select,
-.navigation-settings input {
+:where(.page) :global(.navigation-settings select),
+:where(.page) :global(.navigation-settings input) {
   width: 100%;
   margin: 0;
   min-width: 0;
   font-size: 12px;
   padding: 9px 10px;
 }
-.navigation-settings:has(#tree-depth-setting[hidden]) {
+:where(.page) :global(.navigation-settings:has(#tree-depth-setting[hidden])) {
   grid-template-columns: minmax(0, 1fr);
 }
-.endpoint strong,
-.endpoint small {
+:where(.page) :global(.endpoint strong),
+:where(.page) :global(.endpoint small) {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -684,32 +681,32 @@ article > h2 {
   overflow-wrap: anywhere;
 }
 
-.endpoint {
+:where(.page) :global(.endpoint) {
   grid-template-columns: 43px minmax(0, 1fr);
 }
-.endpoint strong {
+:where(.page) :global(.endpoint strong) {
   align-self: start;
 }
 
-#status.warning {
+:where(.page) :global(#status.warning) {
   background: #fff5df;
   color: #815b13;
 }
-button:disabled {
+:where(.page) :global(button:disabled) {
   opacity: 0.6;
   cursor: wait;
 }
 
-.branch-control select {
+:where(.page) :global(.branch-control select) {
   max-width: 260px;
 }
-aside select {
+:where(.page) :global(aside select) {
   max-width: none;
 }
 
 /* Keep native select interaction while giving the chevron its own inset space. */
-select,
-.navigation-settings select {
+:where(.page) :global(select),
+:where(.page) :global(.navigation-settings select) {
   -webkit-appearance: none;
   appearance: none;
   padding-inline-end: 36px;
@@ -720,8 +717,8 @@ select,
 }
 
 @media (forced-colors: active) {
-  select,
-  .navigation-settings select {
+  :where(.page) :global(select),
+  :where(.page) :global(.navigation-settings select) {
     appearance: auto;
     background-image: none;
   }

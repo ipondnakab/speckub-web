@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { discoverEndpointMarkdown } from "@speckub/schema";
 import { collect, discover, eligible } from "./discovery";
 import { parseRepo } from "./github";
-import { renderMarkdown } from "./markdown";
+import { parseMarkdown } from "./markdown";
 const spec =
   "---\nspeckub: true\nspecVersion: 1\nid: users.read\nkind: http\nmethod: GET\npath: /users/{id}\nsummary: Read user\nsource:\n  - api/users.ts\n---\n## Custom section\nCustom body";
 describe("browser discovery matches the released contract", () => {
@@ -61,15 +61,20 @@ describe("repository input", () => {
 });
 describe("untrusted Markdown", () => {
   it("escapes HTML, disallows script links, does not fetch images, pins source links", () => {
-    const result = renderMarkdown(
+    const result = parseMarkdown(
       "<script>alert(1)</script>\n\n[x](javascript:alert(1))\n\n![tracking](https://evil.com/pixel)\n\n[code](../api.ts)",
       { owner: "a", name: "b", full: "a/b", defaultBranch: "main" },
       "123",
       "docs/spec.md",
     );
-    expect(result).not.toContain("<script>");
-    expect(result).not.toContain("<img");
-    expect(result).not.toContain('href="javascript:');
-    expect(result).toContain("https://github.com/a/b/blob/123/api.ts");
+    const inline = result.tokens.flatMap((token) => token.children ?? []);
+    expect(inline.some((token) => token.type === "html_inline")).toBe(false);
+    const links = inline.filter((token) => token.type === "link_open");
+    expect(links.map((token) => token.attrGet("href"))).toEqual([
+      "https://github.com/a/b/blob/123/api.ts",
+    ]);
+    expect(inline.find((token) => token.type === "image")?.content).toBe(
+      "tracking",
+    );
   });
 });

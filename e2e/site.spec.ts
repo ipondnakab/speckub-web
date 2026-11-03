@@ -13,7 +13,7 @@ test("introduction leads to docs and reader without fetching repository data", a
     "Your source of truth.",
   );
   await page.getByRole("link", { name: "Start documenting" }).click();
-  await expect(page).toHaveURL(/docs\.html$/);
+  await expect(page).toHaveURL(/\/docs$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "From source code to API documentation",
   );
@@ -32,7 +32,7 @@ test("introduction leads to docs and reader without fetching repository data", a
     .getByRole("navigation", { name: "Main navigation" })
     .getByRole("link", { name: "Explorer" })
     .click();
-  await expect(page).toHaveURL(/explorer\.html$/);
+  await expect(page).toHaveURL(/\/explorer$/);
   await expect(
     page.getByRole("textbox", { name: "Public GitHub, GitLab, or Bitbucket repository" }),
   ).toBeVisible();

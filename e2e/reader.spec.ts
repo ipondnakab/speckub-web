@@ -69,6 +69,7 @@ test("browse, render diagrams, switch branch, filter and deep-link", async ({
   await page.getByRole("searchbox").fill("missing");
   await expect(page.locator("#endpoints")).toHaveText("No matching endpoints.");
   await page.getByRole("searchbox").fill("");
+  await page.getByRole("searchbox").blur();
   await expect(page.locator(".diagram svg")).toBeVisible();
   await page.screenshot({
     path: testInfo.outputPath("reader.png"),
@@ -81,6 +82,11 @@ test("browse, render diagrams, switch branch, filter and deep-link", async ({
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth),
   ).toBeLessThanOrEqual(390);
+  await expect(page.locator(".site-header")).toHaveCount(1);
+  await expect(page.locator("#main")).toHaveCount(1);
+  await page.locator("#document").screenshot({
+    path: testInfo.outputPath("document-mobile.png"),
+  });
   await page.screenshot({
     path: testInfo.outputPath("mobile.png"),
     fullPage: true,
@@ -148,6 +154,11 @@ test("path tree keeps parent routes, multiple methods and filtered matches acces
   await page.getByRole("searchbox").fill("users.read");
   await expect(page.locator(".endpoint")).toHaveCount(1);
   await expect(page.locator(".endpoint")).toBeVisible();
+  await users.locator("summary").first().focus();
+  await page.keyboard.press("Enter");
+  await expect(users).not.toHaveAttribute("open");
+  await page.keyboard.press("Enter");
+  await expect(users).toHaveAttribute("open");
   await page.getByRole("searchbox").fill("");
   await expect(
     page.locator('details[data-path="/api/users"]'),
@@ -524,7 +535,7 @@ Query parameters are ignored.
   });
   await expect(example).toHaveAttribute(
     "href",
-    "/explorer.html?repo=ipondnakab%2Fspeckub&branch=feat%2Fcrud-deep-path-playground&endpoint=projects.list",
+    "/explorer?repo=ipondnakab%2Fspeckub&branch=feat%2Fcrud-deep-path-playground&endpoint=projects.list",
   );
   await example.click();
   await expect(
@@ -580,4 +591,18 @@ Query parameters are ignored.
       path: testInfo.outputPath(`readable-table-${width}.png`),
     });
   }
+  await page.goBack();
+  await expect(page).toHaveURL(/\/explorer$/);
+  await expect(page.locator("#workspace")).toBeHidden();
+  await expect(
+    page.getByRole("textbox", { name: "Public GitHub repository" }),
+  ).toHaveValue("");
+  await page.goForward();
+  await expect(
+    page.getByRole("heading", {
+      name: "List organization projects",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(page.getByLabel("Branch", { exact: true })).toHaveValue(branch);
 });

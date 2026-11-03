@@ -1,7 +1,4 @@
-@import "./tables.css";
-@import "./header.css";
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
-:root {
+.page {
   font-family: "DM Sans", system-ui, sans-serif;
   color: #202024;
   background: #fbfafb;
@@ -10,44 +7,44 @@
   --line: #e6e3e5;
   --muted: #6b7280;
 }
-* {
+:where(.page) :global(*) {
   box-sizing: border-box;
 }
-body {
+.page {
   margin: 0;
 }
-a {
+:where(.page) :global(a) {
   color: var(--accent);
   text-decoration: none;
 }
-a:hover {
+:where(.page) :global(a:hover) {
   text-decoration: underline;
 }
-button {
+:where(.page) :global(button) {
   font: inherit;
   cursor: pointer;
 }
-a:focus-visible,
-button:focus-visible {
+:where(.page) :global(a:focus-visible),
+:where(.page) :global(button:focus-visible) {
   outline: 3px solid #ed7091;
   outline-offset: 4px;
 }
-[hidden] {
+:where(.page) :global([hidden]) {
   display: none !important;
 }
-.site-main {
+:where(.page) :global(.site-main) {
   max-width: 1224px;
   margin: auto;
   padding: 0 36px;
 }
-.landing-hero {
+:where(.page) :global(.landing-hero) {
   display: grid;
   grid-template-columns: 1.1fr 1fr;
   gap: 64px;
   align-items: center;
   padding: 82px 0 72px;
 }
-.site-eyebrow {
+:where(.page) :global(.site-eyebrow) {
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1.8px;
@@ -55,7 +52,7 @@ button:focus-visible {
   line-height: 1.7;
   margin: 0 0 22px;
 }
-.status-dot {
+:where(.page) :global(.status-dot) {
   width: 6px;
   height: 6px;
   display: inline-block;
@@ -63,36 +60,36 @@ button:focus-visible {
   border-radius: 50%;
   margin-right: 8px;
 }
-h1,
-h2,
-h3 {
+:where(.page) :global(h1),
+:where(.page) :global(h2),
+:where(.page) :global(h3) {
   font-family: Manrope, system-ui, sans-serif;
 }
-.landing-hero h1 {
+:where(.page) :global(.landing-hero h1) {
   font-size: clamp(40px, 4.4vw, 62px);
   letter-spacing: -2.8px;
   font-weight: 800;
   line-height: 1.13;
   margin: 0 0 25px;
 }
-.landing-hero h1 em {
+:where(.page) :global(.landing-hero h1 em) {
   color: var(--accent);
   font-style: normal;
 }
-.hero-description {
+:where(.page) :global(.hero-description) {
   font-size: 15px;
   line-height: 1.85;
   max-width: 470px;
   color: var(--muted);
 }
-.site-actions {
+:where(.page) :global(.site-actions) {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 24px;
   margin-top: 30px;
 }
-.primary-link {
+:where(.page) :global(.primary-link) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -104,21 +101,21 @@ h3 {
   font-size: 13px;
   font-weight: 700;
 }
-.primary-link:hover {
+:where(.page) :global(.primary-link:hover) {
   background: #ae002c;
   text-decoration: none;
 }
-.text-link {
+:where(.page) :global(.text-link) {
   font-size: 13px;
   font-weight: 600;
   color: #465065;
 }
-.hero-footnote {
+:where(.page) :global(.hero-footnote) {
   font-size: 11px;
   color: #858b96;
   margin-top: 22px;
 }
-.spec-preview {
+:where(.page) :global(.spec-preview) {
   border: 1px solid #e6dce1;
   background: white;
   border-radius: 13px;
@@ -126,7 +123,7 @@ h3 {
   overflow: hidden;
   transform: rotate(1deg);
 }
-.preview-bar {
+:where(.page) :global(.preview-bar) {
   display: flex;
   align-items: center;
   gap: 15px;
@@ -138,16 +135,16 @@ h3 {
   border-bottom: 1px solid var(--line);
   background: #fcfafb;
 }
-.preview-dots {
+:where(.page) :global(.preview-dots) {
   font-size: 9px;
   color: #ddced5;
   letter-spacing: 1px;
 }
-.preview-git {
+:where(.page) :global(.preview-git) {
   margin-left: auto;
   color: var(--accent);
 }
-.preview-code {
+:where(.page) :global(.preview-code) {
   padding: 23px 26px;
   font:
     12px/1.85 ui-monospace,
@@ -156,16 +153,16 @@ h3 {
   background: linear-gradient(120deg, #fff9fb, #fff);
   border-bottom: 1px dashed var(--line);
 }
-.code-muted {
+:where(.page) :global(.code-muted) {
   color: #a0a5af;
 }
-.code-key {
+:where(.page) :global(.code-key) {
   color: #b13455;
 }
-.preview-document {
+:where(.page) :global(.preview-document) {
   padding: 23px 26px;
 }
-.preview-badge {
+:where(.page) :global(.preview-badge) {
   color: #198366;
   background: #e6f4ee;
   padding: 4px 6px;
@@ -175,21 +172,21 @@ h3 {
     monospace;
   margin-right: 12px;
 }
-.preview-document > code {
+:where(.page) :global(.preview-document > code) {
   font-size: 12px;
   color: #5c6375;
 }
-.preview-document h2 {
+:where(.page) :global(.preview-document h2) {
   font-size: 19px;
   letter-spacing: -0.6px;
   margin: 20px 0 8px;
 }
-.preview-document p {
+:where(.page) :global(.preview-document p) {
   font-size: 12px;
   line-height: 1.8;
   color: #79808e;
 }
-.preview-flow {
+:where(.page) :global(.preview-flow) {
   display: flex;
   align-items: center;
   gap: 13px;
@@ -197,20 +194,20 @@ h3 {
   font-size: 10px;
   color: #aab0bb;
 }
-.preview-flow span:nth-child(odd) {
+:where(.page) :global(.preview-flow span:nth-child(odd)) {
   border: 1px solid var(--line);
   background: #fbfafb;
   padding: 8px 15px;
   border-radius: 5px;
   color: #5a6273;
 }
-.preview-bottom {
+:where(.page) :global(.preview-bottom) {
   border-top: 1px solid var(--line);
   padding: 12px 26px;
   font-size: 10px;
   color: #818795;
 }
-.principles {
+:where(.page) :global(.principles) {
   border-block: 1px solid var(--line);
   display: flex;
   flex-wrap: wrap;
@@ -220,35 +217,35 @@ h3 {
   font-size: 11px;
   color: #6d7584;
 }
-.site-section {
+:where(.page) :global(.site-section) {
   padding: 78px 0;
 }
-.section-heading {
+:where(.page) :global(.section-heading) {
   display: flex;
   justify-content: space-between;
   align-items: end;
   gap: 40px;
   margin-bottom: 35px;
 }
-.section-heading h2,
-.quickstart-panel h2,
-.closing-panel h2 {
+:where(.page) :global(.section-heading h2),
+:where(.page) :global(.quickstart-panel h2),
+:where(.page) :global(.closing-panel h2) {
   font-size: clamp(26px, 3vw, 36px);
   font-weight: 800;
   line-height: 1.3;
   letter-spacing: -1.2px;
   margin: 0;
 }
-.section-heading .site-eyebrow {
+:where(.page) :global(.section-heading .site-eyebrow) {
   margin-bottom: 13px;
 }
-.section-heading > p {
+:where(.page) :global(.section-heading > p) {
   max-width: 330px;
   font-size: 13px;
   line-height: 1.9;
   color: var(--muted);
 }
-.workflow-grid {
+:where(.page) :global(.workflow-grid) {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   border: 1px solid var(--line);
@@ -256,35 +253,35 @@ h3 {
   overflow: hidden;
   background: white;
 }
-.workflow-grid > a {
+:where(.page) :global(.workflow-grid > a) {
   padding: 28px 23px;
   border-right: 1px solid var(--line);
   color: inherit;
 }
-.workflow-grid > a:last-child {
+:where(.page) :global(.workflow-grid > a:last-child) {
   border-right: 0;
 }
-.workflow-grid > a:hover {
+:where(.page) :global(.workflow-grid > a:hover) {
   background: #fff6f8;
   text-decoration: none;
 }
-.step-number {
+:where(.page) :global(.step-number) {
   font:
     12px ui-monospace,
     monospace;
   color: var(--accent);
 }
-.workflow-grid h3 {
+:where(.page) :global(.workflow-grid h3) {
   font-size: 18px;
   margin: 22px 0 10px;
 }
-.workflow-grid p {
+:where(.page) :global(.workflow-grid p) {
   font-size: 12px;
   line-height: 1.85;
   color: var(--muted);
   min-height: 70px;
 }
-.workflow-grid code {
+:where(.page) :global(.workflow-grid code) {
   display: inline-block;
   font-size: 10px;
   background: #f4f1f3;
@@ -293,13 +290,13 @@ h3 {
   border-radius: 4px;
   margin-top: 10px;
 }
-.section-note {
+:where(.page) :global(.section-note) {
   font-size: 11px;
   color: #87909c;
   line-height: 1.8;
   margin: 20px 0 0;
 }
-.quickstart-panel {
+:where(.page) :global(.quickstart-panel) {
   border: 1px solid #e8dfe4;
   background: #f7f2f5;
   border-radius: 12px;
@@ -308,28 +305,28 @@ h3 {
   grid-template-columns: 1fr 1.2fr;
   gap: 50px;
 }
-.quickstart-panel .site-eyebrow {
+:where(.page) :global(.quickstart-panel .site-eyebrow) {
   color: #9d6a7d;
   margin-bottom: 16px;
 }
-.quickstart-panel > div > p:not(.site-eyebrow) {
+:where(.page) :global(.quickstart-panel > div > p:not(.site-eyebrow)) {
   font-size: 13px;
   line-height: 1.9;
   color: var(--muted);
 }
-.terminal-card {
+:where(.page) :global(.terminal-card) {
   border: 1px solid #e4dce1;
   border-radius: 8px;
   background: #fff;
   min-width: 0;
   padding: 22px;
 }
-.terminal-label {
+:where(.page) :global(.terminal-label) {
   font-size: 9px;
   letter-spacing: 1.2px;
   color: #9c7d8e;
 }
-.code-block {
+:where(.page) :global(.code-block) {
   margin: 16px 0 25px;
   max-width: 100%;
   min-width: 0;
@@ -338,7 +335,7 @@ h3 {
   background: #faf8fa;
   overflow: hidden;
 }
-.code-toolbar {
+:where(.page) :global(.code-toolbar) {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -349,7 +346,7 @@ h3 {
   font-size: 10px;
   background: #f6f2f5;
 }
-.copy-feedback {
+:where(.page) :global(.copy-feedback) {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -358,7 +355,7 @@ h3 {
   clip-path: inset(50%);
   white-space: nowrap;
 }
-.copy-code {
+:where(.page) :global(.copy-code) {
   margin-left: auto;
   flex-shrink: 0;
   border: 1px solid #ddd4db;
@@ -368,10 +365,10 @@ h3 {
   color: #6e5664;
   font-size: 10px;
 }
-.copy-code:disabled {
+:where(.page) :global(.copy-code:disabled) {
   cursor: wait;
 }
-pre {
+:where(.page) :global(pre) {
   margin: 0;
   padding: 18px;
   overflow-x: auto;
@@ -382,63 +379,63 @@ pre {
   max-width: 100%;
   tab-size: 2;
 }
-pre code {
+:where(.page) :global(pre code) {
   font: inherit;
   white-space: pre;
 }
-pre:focus-visible {
+:where(.page) :global(pre:focus-visible) {
   outline: 2px solid #ed7091;
   outline-offset: -3px;
 }
-.code-block--prompt pre code {
+:where(.page) :global(.code-block--prompt pre code) {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
-.terminal-card .code-block {
+:where(.page) :global(.terminal-card .code-block) {
   margin: 10px 0 22px;
 }
-.terminal-card pre {
+:where(.page) :global(.terminal-card pre) {
   font-size: 11px;
   padding: 14px 12px;
 }
-.terminal-card > p {
+:where(.page) :global(.terminal-card > p) {
   font-size: 10px;
   line-height: 1.7;
   color: #87909b;
   margin: 0;
 }
-.usecase-grid {
+:where(.page) :global(.usecase-grid) {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 46px;
 }
-.usecase-label {
+:where(.page) :global(.usecase-label) {
   font-size: 9px;
   letter-spacing: 1.6px;
   color: #9a8b94;
 }
-.usecase-grid h3 {
+:where(.page) :global(.usecase-grid h3) {
   font-size: 18px;
   margin: 16px 0 10px;
 }
-.usecase-grid p {
+:where(.page) :global(.usecase-grid p) {
   font-size: 13px;
   line-height: 1.9;
   color: var(--muted);
 }
-.usecase-grid a {
+:where(.page) :global(.usecase-grid a) {
   font-size: 12px;
 }
-.closing-panel {
+:where(.page) :global(.closing-panel) {
   text-align: center;
   border-block: 1px solid var(--line);
   padding: 55px 20px;
   margin-bottom: 65px;
 }
-.closing-panel .site-actions {
+:where(.page) :global(.closing-panel .site-actions) {
   justify-content: center;
 }
-.site-footer {
+:where(.page) :global(.site-footer) {
   max-width: 1224px;
   margin: auto;
   padding: 0 36px 34px;
@@ -447,26 +444,26 @@ pre:focus-visible {
   align-items: center;
   gap: 20px;
 }
-.site-footer .brand {
+:where(.page) :global(.site-footer .brand) {
   font-size: 15px;
   flex-wrap: wrap;
   gap: 10px;
 }
-.footer-tagline {
+:where(.page) :global(.footer-tagline) {
   font-family: "DM Sans", system-ui, sans-serif;
   font-size: 10px;
   font-weight: 400;
   color: #9399a5;
 }
-.site-footer > div {
+:where(.page) :global(.site-footer > div) {
   display: flex;
   gap: 20px;
 }
-.site-footer > div a {
+:where(.page) :global(.site-footer > div a) {
   font-size: 10px;
   color: #7c8492;
 }
-.docs-layout {
+:where(.page) :global(.docs-layout) {
   display: grid;
   grid-template-columns: 220px minmax(0, 760px);
   gap: 72px;
@@ -474,7 +471,7 @@ pre:focus-visible {
   padding: 50px 36px 80px;
   margin: auto;
 }
-.docs-sidebar {
+:where(.page) :global(.docs-sidebar) {
   position: sticky;
   top: 25px;
   align-self: start;
@@ -482,49 +479,49 @@ pre:focus-visible {
   overflow: auto;
   padding-right: 14px;
 }
-.docs-sidebar .site-eyebrow {
+:where(.page) :global(.docs-sidebar .site-eyebrow) {
   font-size: 9px;
   margin-bottom: 17px;
 }
-.docs-sidebar nav {
+:where(.page) :global(.docs-sidebar nav) {
   display: flex;
   flex-direction: column;
   gap: 3px;
 }
-.docs-sidebar nav a {
+:where(.page) :global(.docs-sidebar nav a) {
   color: #747c89;
   font-size: 12px;
   line-height: 1.6;
   padding: 7px 12px;
   border-left: 2px solid transparent;
 }
-.docs-sidebar nav a[aria-current] {
+:where(.page) :global(.docs-sidebar nav a[aria-current]) {
   color: var(--accent);
   background: #fff0f4;
   border-left-color: var(--accent);
   border-radius: 0 4px 4px 0;
 }
-.docs-explorer-link {
+:where(.page) :global(.docs-explorer-link) {
   display: block;
   margin: 25px 0 0 12px;
   padding-top: 20px;
   border-top: 1px solid var(--line);
   font-size: 11px;
 }
-.docs-content {
+:where(.page) :global(.docs-content) {
   min-width: 0;
   color: #596273;
   font-size: 14px;
   line-height: 1.9;
 }
-.docs-content h1 {
+:where(.page) :global(.docs-content h1) {
   color: #202024;
   font-size: 40px;
   line-height: 1.25;
   letter-spacing: -1.5px;
   margin: 0 0 24px;
 }
-.docs-content h2 {
+:where(.page) :global(.docs-content h2) {
   color: #202024;
   font-size: 25px;
   line-height: 1.4;
@@ -533,30 +530,30 @@ pre:focus-visible {
   padding-top: 38px;
   margin: 45px 0 18px;
 }
-.docs-content h3 {
+:where(.page) :global(.docs-content h3) {
   color: #333b4a;
   font-size: 17px;
   margin: 28px 0 12px;
 }
-.docs-content h1,
-.docs-content h2,
-.docs-content h3 {
+:where(.page) :global(.docs-content h1),
+:where(.page) :global(.docs-content h2),
+:where(.page) :global(.docs-content h3) {
   scroll-margin-top: 24px;
 }
-.docs-content p {
+:where(.page) :global(.docs-content p) {
   margin: 0 0 18px;
 }
-.docs-content strong {
+:where(.page) :global(.docs-content strong) {
   color: #384151;
 }
-.docs-content ul {
+:where(.page) :global(.docs-content ul) {
   padding-left: 22px;
 }
-.docs-content li {
+:where(.page) :global(.docs-content li) {
   padding-left: 5px;
   margin: 7px 0;
 }
-.docs-content :not(pre) > code {
+:where(.page) :global(.docs-content :not(pre) > code) {
   font:
     12px ui-monospace,
     monospace;
@@ -566,174 +563,174 @@ pre:focus-visible {
   border-radius: 3px;
   overflow-wrap: anywhere;
 }
-.docs-content table {
+:where(.page) :global(.docs-content table) {
   border-collapse: collapse;
   font-size: 12px;
   line-height: 1.8;
 }
-.docs-content th,
-.docs-content td {
+:where(.page) :global(.docs-content th),
+:where(.page) :global(.docs-content td) {
   padding: 12px;
   border: 1px solid var(--line);
   text-align: left;
   vertical-align: top;
 }
-.docs-content th {
+:where(.page) :global(.docs-content th) {
   background: #f5f0f3;
   color: #4e596c;
 }
 @media (max-width: 1000px) {
-  .landing-hero {
+  :where(.page) :global(.landing-hero) {
     gap: 32px;
   }
-  .landing-hero h1 {
+  :where(.page) :global(.landing-hero h1) {
     font-size: 46px;
   }
-  .docs-layout {
+  :where(.page) :global(.docs-layout) {
     gap: 36px;
     grid-template-columns: 190px minmax(0, 1fr);
   }
-  .quickstart-panel {
+  :where(.page) :global(.quickstart-panel) {
     gap: 25px;
     padding: 28px;
   }
-  .site-footer {
+  :where(.page) :global(.site-footer) {
     flex-wrap: wrap;
   }
 }
 @media (max-width: 760px) {
-  .site-main {
+  :where(.page) :global(.site-main) {
     padding: 0 20px;
   }
-  .landing-hero {
+  :where(.page) :global(.landing-hero) {
     grid-template-columns: 1fr;
     gap: 36px;
     padding: 48px 0 40px;
   }
-  .landing-hero h1 {
+  :where(.page) :global(.landing-hero h1) {
     font-size: 44px;
     letter-spacing: -2px;
   }
-  .hero-description {
+  :where(.page) :global(.hero-description) {
     max-width: 100%;
     font-size: 14px;
   }
-  .site-actions {
+  :where(.page) :global(.site-actions) {
     gap: 18px;
   }
-  .text-link {
+  :where(.page) :global(.text-link) {
     font-size: 12px;
   }
-  .spec-preview {
+  :where(.page) :global(.spec-preview) {
     transform: none;
   }
-  .principles {
+  :where(.page) :global(.principles) {
     display: grid;
     grid-template-columns: 1fr 1fr;
     font-size: 10px;
     gap: 17px;
     line-height: 1.6;
   }
-  .site-section {
+  :where(.page) :global(.site-section) {
     padding: 48px 0;
   }
-  .section-heading {
+  :where(.page) :global(.section-heading) {
     flex-direction: column;
     align-items: start;
     gap: 12px;
     margin-bottom: 24px;
   }
-  .section-heading > p {
+  :where(.page) :global(.section-heading > p) {
     margin: 0;
   }
-  .workflow-grid {
+  :where(.page) :global(.workflow-grid) {
     grid-template-columns: 1fr 1fr;
   }
-  .workflow-grid > a {
+  :where(.page) :global(.workflow-grid > a) {
     padding: 22px 17px;
   }
-  .workflow-grid > a:nth-child(2) {
+  :where(.page) :global(.workflow-grid > a:nth-child(2)) {
     border-right: 0;
   }
-  .workflow-grid > a:nth-child(-n + 2) {
+  :where(.page) :global(.workflow-grid > a:nth-child(-n + 2)) {
     border-bottom: 1px solid var(--line);
   }
-  .workflow-grid h3 {
+  :where(.page) :global(.workflow-grid h3) {
     font-size: 16px;
     margin-top: 16px;
   }
-  .workflow-grid p {
+  :where(.page) :global(.workflow-grid p) {
     min-height: 0;
     font-size: 11px;
   }
-  .quickstart-panel {
+  :where(.page) :global(.quickstart-panel) {
     grid-template-columns: 1fr;
     padding: 25px 20px;
     gap: 25px;
   }
-  .terminal-card {
+  :where(.page) :global(.terminal-card) {
     padding: 16px;
   }
-  .usecase-grid {
+  :where(.page) :global(.usecase-grid) {
     grid-template-columns: 1fr;
     gap: 25px;
   }
-  .closing-panel {
+  :where(.page) :global(.closing-panel) {
     margin-bottom: 40px;
     padding: 40px 0;
   }
-  .site-footer {
+  :where(.page) :global(.site-footer) {
     padding: 0 20px 25px;
     gap: 22px;
   }
-  .site-footer > div {
+  :where(.page) :global(.site-footer > div) {
     flex-wrap: wrap;
     gap: 18px;
   }
-  .footer-tagline {
+  :where(.page) :global(.footer-tagline) {
     display: block;
     width: 100%;
   }
-  .docs-layout {
+  :where(.page) :global(.docs-layout) {
     grid-template-columns: 1fr;
     padding: 28px 20px 48px;
     gap: 30px;
   }
-  .docs-sidebar {
+  :where(.page) :global(.docs-sidebar) {
     position: static;
     max-height: none;
     border-bottom: 1px solid var(--line);
     padding: 0 0 24px;
   }
-  .docs-sidebar nav {
+  :where(.page) :global(.docs-sidebar nav) {
     flex-direction: row;
     flex-wrap: wrap;
     gap: 4px;
   }
-  .docs-sidebar nav a {
+  :where(.page) :global(.docs-sidebar nav a) {
     border: 1px solid var(--line);
     padding: 5px 9px;
     border-radius: 5px;
     font-size: 10px;
   }
-  .docs-explorer-link {
+  :where(.page) :global(.docs-explorer-link) {
     display: none;
   }
-  .docs-content h1 {
+  :where(.page) :global(.docs-content h1) {
     font-size: 31px;
     letter-spacing: -1px;
   }
-  .docs-content h2 {
+  :where(.page) :global(.docs-content h2) {
     font-size: 23px;
   }
-  .docs-content {
+  :where(.page) :global(.docs-content) {
     font-size: 13px;
   }
-  .docs-content th,
-  .docs-content td {
+  :where(.page) :global(.docs-content th),
+  :where(.page) :global(.docs-content td) {
     padding: 8px;
   }
-  .docs-content table {
+  :where(.page) :global(.docs-content table) {
     font-size: 11px;
   }
 }

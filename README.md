@@ -1,16 +1,16 @@
 # SpecKub — introduction, docs, and explorer
 
-[Open the reader](https://speckub-web.vercel.app) · [Try the SpecKub repository](https://speckub-web.vercel.app/explorer.html?repo=ipondnakab%2Fspeckub&branch=feat%2Fcrud-deep-path-playground&endpoint=projects.list)
+[Open the reader](https://speckub-web.vercel.app) · [Try the SpecKub repository](https://speckub-web.vercel.app/explorer?repo=ipondnakab%2Fspeckub&branch=feat%2Fcrud-deep-path-playground&endpoint=projects.list)
 
-The public website for [SpecKub](https://github.com/ipondnakab/speckub), with a product introduction, practical documentation, and an API reference explorer.
+A Next.js App Router website for [SpecKub](https://github.com/ipondnakab/speckub), with a product introduction, practical documentation, and an API reference explorer.
 
 ## Site pages
 
 - `/`: introduction, workflow, use cases, and quickstart.
-- `/docs.html`: complete user guide: setup, agent skills, templates, metadata, JSON examples, validation, private/public readers, CLI reference, and troubleshooting.
-- `/explorer.html`: the public GitHub repository reader.
+- `/docs` (legacy `/docs.html` redirects here): complete user guide: setup, agent skills, templates, metadata, JSON examples, validation, private/public readers, CLI reference, and troubleshooting.
+- `/explorer` (legacy `/explorer.html` redirects here): the public GitHub repository reader.
 
-Existing `/?repo=owner/repo&branch=main&endpoint=ID` links continue to open the reader. Introduction and docs are bundled static content; viewing them does not call GitHub APIs. Edit `content/guide.md` to update the guide. Heading anchors and the section navigation are generated at build/runtime from this bundled Markdown; no external CMS is required.
+Existing `/?repo=owner/repo&branch=main&endpoint=ID` links redirect to the explorer with all query parameters preserved. The homepage and docs render their bundled content on the server; viewing them does not call GitHub APIs. Edit `app/components/home.tsx` for the introduction and `content/guide.md` for the guide. The guide is prerendered at build time with heading anchors and section navigation; no external CMS is required. All page shells and reader controls use React components under one App Router root layout. Internal links use Next.js navigation; page styles use CSS Modules. Markdown is parsed into React elements, including accessible tables, copyable code examples, and diagram components.
 
 Paste a public GitHub repository URL, choose a branch, and browse its Markdown API specifications. Specs remain in their original repository; no upload or account is required.
 
@@ -61,27 +61,29 @@ See [development conventions](docs/development.md) for page boundaries, document
 Requires Node.js 22.12+.
 
 ```sh
-npm ci
-npm run dev
+yarn install --frozen-lockfile
+yarn dev
 ```
 
 ```sh
-npm run lint
-npm run typecheck
-npm test
-npm run build
-npm run preview
+yarn lint
+yarn typecheck
+yarn test
+yarn build
+yarn start
 
 # Browser integration tests (install browser once)
-npx playwright install chromium
-npm run test:e2e
+yarn playwright install chromium
+yarn test:e2e
 ```
+
+`yarn dev` serves at `http://127.0.0.1:3000`. `yarn start` and `yarn preview` serve the production build; run `yarn build` first. Playwright tests use that production build. `predev` and `prebuild` copy the installed Mermaid browser bundle to `public/vendor/`; it is generated locally and is not committed.
 
 ## Deploy to Vercel
 
-Import `ipondnakab/speckub-web` in Vercel. Use the **Vite** preset, repository root, build command `npm run build`, output `dist`. No environment variables or secrets are required. Connect the GitHub repository for automatic deployments and PR previews.
+Import `ipondnakab/speckub-web` in Vercel. Use the **Next.js** preset and repository root. Use `yarn install --frozen-lockfile` to install and `yarn build` to build; leave the output directory at its framework default (`.next`). Remove any previous Vite/dist overrides from the Vercel project settings. No environment variables or secrets are required at this stage. Connect the GitHub repository for automatic deployments and PR previews.
 
-The application is static. Requests go directly from the browser to GitHub; there is no server proxy and no stored GitHub token. The Vercel config adds basic security headers. Query parameters support deep links without SPA path rewrites.
+Next.js handles routing, server rendering, legacy URL redirects, and basic security headers. The explorer still requests public GitHub data directly from the browser; authentication and private repository creation are a separate next step. No GitHub tokens are stored. Mermaid is self-hosted and loaded through `next/script`; reader query parameters use `next/navigation`. A Node.js runtime is required; this project does not use Next.js static export.
 
 ## Limits and privacy
 
