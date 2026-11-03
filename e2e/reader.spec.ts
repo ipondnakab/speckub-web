@@ -186,11 +186,9 @@ test("header logo and favicon have a transparent lightning cutout", async ({
   await page.goto("/");
   await expect(page.locator(".brand-logo")).toBeVisible();
   const colors = await page.evaluate(async () => {
-    const logo = document.querySelector<SVGSVGElement>(".brand-logo")!;
-    logo.setAttribute("width", "512");
-    logo.setAttribute("height", "512");
+    const logo = document.querySelector<HTMLImageElement>(".brand-logo")!;
     const sources = [
-      `data:image/svg+xml,${encodeURIComponent(new XMLSerializer().serializeToString(logo))}`,
+      logo.currentSrc || logo.src,
       document.querySelector<HTMLLinkElement>('link[rel="icon"]')!.href,
     ];
     return Promise.all(
@@ -211,7 +209,7 @@ test("header logo and favicon have a transparent lightning cutout", async ({
   });
   for (const pixels of colors) {
     expect(pixels.cutout[3]).toBe(0);
-    expect(pixels.red).toEqual([223, 0, 56, 255]);
+    expect(pixels.red).toEqual([216, 0, 50, 255]);
   }
 });
 
