@@ -6,3 +6,8 @@ dist/
 test-results/
 playwright-report/
 .vercel
+
+.next/
+next-env.d.ts
+*.tsbuildinfo
+public/vendor/mermaid.tiny.js

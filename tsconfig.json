@@ -11,11 +11,30 @@
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "allowJs": true
   },
   "include": [
+    "next-env.d.ts",
+    "app/**/*.ts",
+    "app/**/*.tsx",
     "src",
     "e2e",
-    "playwright.config.ts"
+    "next.config.ts",
+    "playwright.config.ts",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }
